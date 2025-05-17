@@ -2,12 +2,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { type IntrospectionData } from '@/types/trpc';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { PlayIcon } from 'lucide-react';
 import { MonacoEditor } from '../monaco-editor';
 import { type Monaco } from '@monaco-editor/react';
 import { EditorSettings } from './editor-settings';
 import { setupCompletionProvider } from './completion-provider';
+import { useSettings } from '@/hooks/use-settings';
 
 interface QueryEditorProps {
   query: string;
@@ -25,7 +26,7 @@ export function QueryEditor({
   introspectionData 
 }: QueryEditorProps) {
   const disposableRef = useRef<any>(null);
-  const [fontSize, setFontSize] = useState(14);
+  const { settings, updateEditorSettings } = useSettings();
 
   const handleEditorMount = (editor: any, monaco: Monaco) => {
     const disposable = setupCompletionProvider(monaco, introspectionData);
@@ -44,15 +45,15 @@ export function QueryEditor({
   }, []);
 
   const handleZoomIn = () => {
-    setFontSize(prev => Math.min(prev + 2, 24));
+    updateEditorSettings({ fontSize: Math.min(settings.editor.fontSize + 2, 24) });
   };
 
   const handleZoomOut = () => {
-    setFontSize(prev => Math.max(prev - 2, 8));
+    updateEditorSettings({ fontSize: Math.max(settings.editor.fontSize - 2, 8) });
   };
 
   const handleResetZoom = () => {
-    setFontSize(14);
+    updateEditorSettings({ fontSize: 14 });
   };
 
   return (
@@ -85,7 +86,7 @@ export function QueryEditor({
             value={query}
             onChange={(value) => setQuery(value || '')}
             onMount={handleEditorMount}
-            fontSize={fontSize}
+            fontSize={settings.editor.fontSize}
           />
         </div>
       </CardContent>

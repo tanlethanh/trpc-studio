@@ -18,7 +18,7 @@ interface EditorSettingsProps {
 export function EditorSettings({ 
   onZoomIn, 
   onZoomOut, 
-  onResetZoom 
+  onResetZoom,
 }: EditorSettingsProps) {
   return (
     <DropdownMenu>
@@ -55,6 +55,8 @@ export function EditorSettings({
           <TypeIcon className="mr-2 h-4 w-4" />
           Reset Zoom
         </DropdownMenuCheckboxItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="pl-2">Editor Mode</DropdownMenuLabel>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -5,6 +5,7 @@ import { ChevronLeft, LayoutGrid, LayoutList } from 'lucide-react';
 import { type IntrospectionData } from '@/types/trpc';
 import { ProcedureList } from './procedure-list';
 import { SchemaView } from './schema-view';
+import { useSettings } from '@/hooks/use-settings';
 
 interface IntrospectionViewProps {
   data: IntrospectionData | null;
@@ -12,26 +13,18 @@ interface IntrospectionViewProps {
   error: string | null;
 }
 
-type ViewMode = 'list' | 'detail';
-type ProcedureType = 'query' | 'mutation' | 'subscription';
-type SchemaViewMode = 'raw' | 'parsed';
-type LayoutMode = 'horizontal' | 'vertical';
-
 export function IntrospectionView({ data, isLoading, error }: IntrospectionViewProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const { settings, updateIntrospectionSettings } = useSettings();
   const [selectedProcedure, setSelectedProcedure] = useState<IntrospectionData['procedures'][0] | null>(null);
-  const [selectedType, setSelectedType] = useState<ProcedureType | 'all'>('all');
-  const [schemaViewMode, setSchemaViewMode] = useState<SchemaViewMode>('parsed');
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>('horizontal');
 
   const handleProcedureClick = (procedure: IntrospectionData['procedures'][0]) => {
     setSelectedProcedure(procedure);
-    setViewMode('detail');
+    updateIntrospectionSettings({ viewMode: 'detail' });
   };
 
   const handleBack = () => {
-    setViewMode('list');
     setSelectedProcedure(null);
+    updateIntrospectionSettings({ viewMode: 'list' });
   };
 
   if (isLoading) {
@@ -58,83 +51,69 @@ export function IntrospectionView({ data, isLoading, error }: IntrospectionViewP
     );
   }
 
-  if (viewMode === 'detail' && selectedProcedure) {
+  if (settings.introspection.viewMode === 'detail' && selectedProcedure) {
     return (
       <div className="h-full flex flex-col">
-        <CardHeader className="flex-none border-b bg-muted/30 py-2">
+        <CardHeader className="flex-none p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-7 px-2"
+                size="icon"
                 onClick={handleBack}
+                className="h-8 w-8"
               >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
+                <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm font-medium">
-                {selectedProcedure.path}
-              </span>
-              <span className={`px-2 py-0.5 rounded text-xs ${
-                selectedProcedure.type === 'query' 
-                  ? 'bg-blue-500/10 text-blue-500'
-                  : selectedProcedure.type === 'mutation'
-                  ? 'bg-purple-500/10 text-purple-500'
-                  : 'bg-green-500/10 text-green-500'
-              }`}>
-                {selectedProcedure.type}
-              </span>
+              <div>
+                <h2 className="text-lg font-semibold">{selectedProcedure.path}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedProcedure.type.toUpperCase()} Procedure
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              {schemaViewMode === 'parsed' && (
-                <>
-                  <Button
-                    variant={layoutMode === 'horizontal' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="h-7"
-                    onClick={() => setLayoutMode('horizontal')}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={layoutMode === 'vertical' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="h-7"
-                    onClick={() => setLayoutMode('vertical')}
-                  >
-                    <LayoutList className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
               <Button
-                variant={schemaViewMode === 'parsed' ? 'default' : 'ghost'}
-                size="sm"
-                className="h-7"
-                onClick={() => setSchemaViewMode('parsed')}
+                variant="ghost"
+                size="icon"
+                onClick={() => updateIntrospectionSettings({ 
+                  schemaViewMode: settings.introspection.schemaViewMode === 'raw' ? 'parsed' : 'raw' 
+                })}
+                className="h-8 w-8"
               >
-                Parsed
+                {settings.introspection.schemaViewMode === 'raw' ? (
+                  <LayoutList className="h-4 w-4" />
+                ) : (
+                  <LayoutGrid className="h-4 w-4" />
+                )}
               </Button>
               <Button
-                variant={schemaViewMode === 'raw' ? 'default' : 'ghost'}
-                size="sm"
-                className="h-7"
-                onClick={() => setSchemaViewMode('raw')}
+                variant="ghost"
+                size="icon"
+                onClick={() => updateIntrospectionSettings({ 
+                  layoutMode: settings.introspection.layoutMode === 'horizontal' ? 'vertical' : 'horizontal' 
+                })}
+                className="h-8 w-8"
               >
-                Raw
+                {settings.introspection.layoutMode === 'horizontal' ? (
+                  <LayoutGrid className="h-4 w-4" />
+                ) : (
+                  <LayoutList className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
         </CardHeader>
+
         <CardContent className="flex-1 p-0 min-h-0">
-          {schemaViewMode === 'raw' ? (
+          {settings.introspection.schemaViewMode === 'raw' ? (
             <SchemaView 
               schema={selectedProcedure} 
               viewMode="raw"
             />
           ) : (
-            <div className={`h-full ${layoutMode === 'horizontal' ? 'grid grid-cols-2 divide-x' : 'flex flex-col divide-y'}`}>
-              <div className={`h-full flex flex-col ${layoutMode === 'vertical' ? 'flex-1' : ''}`}>
+            <div className={`h-full ${settings.introspection.layoutMode === 'horizontal' ? 'grid grid-cols-2 divide-x' : 'flex flex-col divide-y'}`}>
+              <div className={`h-full flex flex-col ${settings.introspection.layoutMode === 'vertical' ? 'flex-1' : ''}`}>
                 <div className="flex-none border-b bg-muted/30 py-2 px-4">
                   <h3 className="text-sm font-medium">Input Schema</h3>
                 </div>
@@ -142,11 +121,10 @@ export function IntrospectionView({ data, isLoading, error }: IntrospectionViewP
                   <SchemaView 
                     schema={selectedProcedure.inputSchema} 
                     viewMode="parsed"
-                    layoutMode={layoutMode}
                   />
                 </div>
               </div>
-              <div className={`h-full flex flex-col ${layoutMode === 'vertical' ? 'flex-1' : ''}`}>
+              <div className={`h-full flex flex-col ${settings.introspection.layoutMode === 'vertical' ? 'flex-1' : ''}`}>
                 <div className="flex-none border-b bg-muted/30 py-2 px-4">
                   <h3 className="text-sm font-medium">Output Schema</h3>
                 </div>
@@ -154,7 +132,6 @@ export function IntrospectionView({ data, isLoading, error }: IntrospectionViewP
                   <SchemaView 
                     schema={selectedProcedure.outputSchema} 
                     viewMode="parsed"
-                    layoutMode={layoutMode}
                   />
                 </div>
               </div>
@@ -168,8 +145,8 @@ export function IntrospectionView({ data, isLoading, error }: IntrospectionViewP
   return (
     <ProcedureList
       data={data}
-      selectedType={selectedType}
-      setSelectedType={setSelectedType}
+      selectedType={settings.introspection.selectedType}
+      setSelectedType={(type) => updateIntrospectionSettings({ selectedType: type })}
       onProcedureClick={handleProcedureClick}
     />
   );
