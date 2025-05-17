@@ -14,18 +14,7 @@ import { usePanelResize } from '@/hooks/use-panel-resize';
 export default function Home() {
   const [trpcUrl, setTrpcUrl] = useState('http://localhost:3000/api/trpc');
   const [debouncedUrl, setDebouncedUrl] = useState(trpcUrl);
-  const [query, setQuery] = useState(`{
-  "procedure": "complex.getProducts",
-  "input": {
-    "search": "laptop",
-    "categories": ["electronics"],
-    "minPrice": 500,
-    "maxPrice": 1000,
-    "inStock": true,
-    "sortBy": "price",
-    "sortOrder": "asc"
-  }
-}`);
+  const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'result' | 'history' | 'introspection'>('result');
 
   useEffect(() => {
@@ -47,6 +36,22 @@ export default function Home() {
     replayQuery,
     toggleLog 
   } = useQueryExecution(trpcUrl);
+
+  useEffect(() => {
+    fetchIntrospection();
+  }, [debouncedUrl, fetchIntrospection]);
+
+  useEffect(() => {
+    if (introspectionData?.procedures.length && !query) {
+      const firstProcedure = introspectionData.procedures[0];
+      const exampleQuery = {
+        procedure: firstProcedure.path,
+        input: getDefaultInputForSchema(firstProcedure.inputSchema)
+      };
+      setQuery(JSON.stringify(exampleQuery, null, 2));
+    }
+  }, [introspectionData, query]);
+
   const { 
     leftWidth, 
     handleMouseDown, 
@@ -62,10 +67,6 @@ export default function Home() {
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [handleMouseMove, handleMouseUp]);
-
-  useEffect(() => {
-    fetchIntrospection();
-  }, [trpcUrl, fetchIntrospection]);
 
   const runQuery = () => {
     parseAndExecuteQuery(query);
@@ -107,13 +108,16 @@ export default function Home() {
 
       <div id="main-panels" className="flex flex-1 min-h-0 p-4 gap-0" style={{ position: 'relative' }}>
         <div style={{ width: `${leftWidth}%` }} className="h-full flex flex-col">
-          <QueryEditor
-            query={query}
-            setQuery={setQuery}
-            runQuery={runQuery}
-            isLoading={isLoading}
-            introspectionData={introspectionData}
-          />
+          {introspectionData && (
+            <QueryEditor
+              key={JSON.stringify(introspectionData)}
+              query={query}
+              setQuery={setQuery}
+              runQuery={runQuery}
+              isLoading={isLoading}
+              introspectionData={introspectionData}
+            />
+          )}
         </div>
 
         <ResizableDivider onMouseDown={handleMouseDown} />
@@ -135,4 +139,59 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+function getDefaultInputForSchema(schema: any): any {
+  if (!schema) return {};
+  
+  const def = schema._def;
+  if (!def) return {};
+
+  // Handle primitive types
+  if (def.typeName === 'ZodString') {
+    return '';
+  }
+  if (def.typeName === 'ZodNumber') {
+    return 0;
+  }
+  if (def.typeName === 'ZodBoolean') {
+    return false;
+  }
+  if (def.typeName === 'ZodArray') {
+    return [];
+  }
+  if (def.typeName === 'ZodObject' && 'shape' in def) {
+    const shape = def.shape;
+    const result: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(shape)) {
+      const field = value as any;
+      const fieldDef = field._def;
+      const type = fieldDef.typeName;
+
+      switch (type) {
+        case 'ZodString':
+          result[key] = '';
+          break;
+        case 'ZodNumber':
+          result[key] = 0;
+          break;
+        case 'ZodBoolean':
+          result[key] = false;
+          break;
+        case 'ZodArray':
+          result[key] = [];
+          break;
+        case 'ZodObject':
+          result[key] = getDefaultInputForSchema(field);
+          break;
+        default:
+          result[key] = null;
+      }
+    }
+
+    return result;
+  }
+
+  return null;
 }
