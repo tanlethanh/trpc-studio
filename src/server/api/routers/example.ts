@@ -117,6 +117,7 @@ export const exampleRouter = createTRPCRouter({
       filteredUsers.sort((a, b) => {
         const aValue = a[sortBy as keyof User];
         const bValue = b[sortBy as keyof User];
+        if (aValue === undefined || bValue === undefined) return 0;
         return sortOrder === 'asc' 
           ? aValue > bValue ? 1 : -1
           : aValue < bValue ? 1 : -1;
