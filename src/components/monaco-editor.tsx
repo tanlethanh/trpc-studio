@@ -14,7 +14,7 @@ interface MonacoEditorProps {
 }
 
 export function MonacoEditor({ value, onChange, onMount, fontSize = 14, vimMode = false, options }: MonacoEditorProps) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
@@ -32,6 +32,14 @@ export function MonacoEditor({ value, onChange, onMount, fontSize = 14, vimMode 
       editorRef.current.updateOptions({...options});
     }
   }, [vimMode, options]);
+
+  // Update theme when it changes
+  useEffect(() => {
+    if (monacoRef.current && editorRef.current) {
+      const currentTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
+      monacoRef.current.editor.setTheme(currentTheme);
+    }
+  }, [resolvedTheme]);
 
   const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     minimap: { enabled: false },
@@ -85,7 +93,7 @@ export function MonacoEditor({ value, onChange, onMount, fontSize = 14, vimMode 
       defaultLanguage="json"
       value={value}
       onChange={onChange}
-      theme={theme === 'dark' ? 'vs-dark' : 'light'}
+      theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
       onMount={handleEditorDidMount}
       beforeMount={handleEditorWillMount}
       loading={null}
