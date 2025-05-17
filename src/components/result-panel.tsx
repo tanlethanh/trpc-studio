@@ -45,7 +45,7 @@ export function ResultPanel({
     <Card className="w-full flex flex-col border h-full">
       <CardHeader className="flex-none border-b bg-muted/30 py-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 my-1">
             <button
               onClick={() => setActiveTab('result')}
               className={`px-3 py-1 text-sm rounded-md ${

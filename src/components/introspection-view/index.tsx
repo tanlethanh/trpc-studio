@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, LayoutGrid, LayoutList } from 'lucide-react';
+import { ChevronLeft, Code, FileText, LayoutGrid, LayoutList } from 'lucide-react';
 import { type IntrospectionData } from '@/types/trpc';
 import { ProcedureList } from './procedure-list';
 import { SchemaView } from './schema-view';
@@ -54,7 +54,7 @@ export function IntrospectionView({ data, isLoading, error }: IntrospectionViewP
   if (settings.introspection.viewMode === 'detail' && selectedProcedure) {
     return (
       <div className="h-full flex flex-col">
-        <CardHeader className="flex-none p-4">
+        <CardHeader className="flex-none p-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
@@ -66,13 +66,29 @@ export function IntrospectionView({ data, isLoading, error }: IntrospectionViewP
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div>
-                <h2 className="text-lg font-semibold">{selectedProcedure.path}</h2>
+                <h2 className="text-sm font-semibold">{selectedProcedure.path}</h2>
                 <p className="text-sm text-muted-foreground">
                   {selectedProcedure.type.toUpperCase()} Procedure
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {settings.introspection.schemaViewMode === 'parsed' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => updateIntrospectionSettings({ 
+                    layoutMode: settings.introspection.layoutMode === 'horizontal' ? 'vertical' : 'horizontal' 
+                  })}
+                  className="h-8 w-8"
+                >
+                  {settings.introspection.layoutMode === 'horizontal' ? (
+                    <LayoutGrid className="h-4 w-4" />
+                  ) : (
+                    <LayoutList className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -82,23 +98,9 @@ export function IntrospectionView({ data, isLoading, error }: IntrospectionViewP
                 className="h-8 w-8"
               >
                 {settings.introspection.schemaViewMode === 'raw' ? (
-                  <LayoutList className="h-4 w-4" />
+                  <Code className="h-4 w-4" />
                 ) : (
-                  <LayoutGrid className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => updateIntrospectionSettings({ 
-                  layoutMode: settings.introspection.layoutMode === 'horizontal' ? 'vertical' : 'horizontal' 
-                })}
-                className="h-8 w-8"
-              >
-                {settings.introspection.layoutMode === 'horizontal' ? (
-                  <LayoutGrid className="h-4 w-4" />
-                ) : (
-                  <LayoutList className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                 )}
               </Button>
             </div>
