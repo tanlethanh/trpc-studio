@@ -10,6 +10,7 @@ import { EditorSettings } from './editor-settings';
 import { setupCompletionProvider } from './completion-provider';
 import { useSettings } from '@/hooks/use-settings';
 import { ProcedureInputPanel } from './procedure-input-panel';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 interface QueryEditorProps {
   query: string;
@@ -81,21 +82,28 @@ export function QueryEditor({
         </div>
       </CardHeader>
       <CardContent className="flex-1 p-0 min-h-0">
-        <div className="h-full">
-          <MonacoEditor
-            key={JSON.stringify(introspectionData)}
-            value={query}
-            onChange={(value) => setQuery(value || '')}
-            onMount={handleEditorMount}
-            fontSize={settings.editor.fontSize}
-          />
-        </div>
+        <PanelGroup direction="vertical">
+          <Panel defaultSize={70} minSize={30}>
+            <div className="h-full">
+              <MonacoEditor
+                key={JSON.stringify(introspectionData)}
+                value={query}
+                onChange={(value) => setQuery(value || '')}
+                onMount={handleEditorMount}
+                fontSize={settings.editor.fontSize}
+              />
+            </div>
+          </Panel>
+          <PanelResizeHandle className="h-1 bg-border hover:bg-primary/50 transition-colors" />
+          <Panel defaultSize={30} minSize={20}>
+            <ProcedureInputPanel
+              introspectionData={introspectionData}
+              query={query}
+              setQuery={setQuery}
+            />
+          </Panel>
+        </PanelGroup>
       </CardContent>
-      <ProcedureInputPanel
-        introspectionData={introspectionData}
-        query={query}
-        setQuery={setQuery}
-      />
     </Card>
   );
 } 

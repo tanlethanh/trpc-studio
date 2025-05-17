@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown } from 'lucide-react';
 import { type IntrospectionData } from '@/types/trpc';
 import { type SchemaField } from '../types';
 import { parseJsonSchema } from './schema-parser';
@@ -18,7 +17,6 @@ export function ProcedureInputPanel({
   query, 
   setQuery,
 }: ProcedureInputPanelProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const [currentProcedure, setCurrentProcedure] = useState<string | null>(null);
   const [isAtomicType, setIsAtomicType] = useState(false);
@@ -118,42 +116,26 @@ export function ProcedureInputPanel({
   }, [setQuery]);
 
   return (
-    <div className="flex flex-col border-t min-h-[600px]">
+    <div className="flex flex-col h-full">
       <Button
         variant="ghost"
         className="w-full flex items-center justify-between p-2 hover:bg-muted/50 h-10"
-        onClick={() => setIsExpanded(!isExpanded)}
       >
         <span className="text-sm font-medium">Procedure Input</span>
-        {isExpanded ? (
-          <ChevronUp className="h-4 w-4 transition-transform duration-200" />
-        ) : (
-          <ChevronDown className="h-4 w-4 transition-transform duration-200" />
-        )}
       </Button>
-      <div 
-        className={`grid transition-all duration-200 ease-in-out ${
-          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className={`h-full transform transition-all duration-200 ${
-            isExpanded ? 'translate-y-0 opacity-100' : 'translate-y-[-100%] opacity-0'
-          }`}>
-            <div className="flex flex-col">
-              <ProcedureSelector
-                introspectionData={introspectionData}
-                currentProcedure={currentProcedure}
-                onProcedureChange={handleProcedureChange}
-              />
-              <div className="overflow-auto">
-                <InputFields
-                  fields={fields}
-                  inputValues={inputValues}
-                  onInputChange={handleInputChange}
-                />
-              </div>
-            </div>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="h-full flex flex-col">
+          <ProcedureSelector
+            introspectionData={introspectionData}
+            currentProcedure={currentProcedure}
+            onProcedureChange={handleProcedureChange}
+          />
+          <div className="flex-1 overflow-auto">
+            <InputFields
+              fields={fields}
+              inputValues={inputValues}
+              onInputChange={handleInputChange}
+            />
           </div>
         </div>
       </div>
