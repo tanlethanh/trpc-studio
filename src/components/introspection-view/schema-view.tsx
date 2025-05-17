@@ -1,6 +1,5 @@
 import { Editor } from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
-import { type IntrospectionData } from '@/types/trpc';
 
 interface SchemaField {
   name: string;
@@ -20,10 +19,9 @@ interface ParsedSchema {
 interface SchemaViewProps {
   schema: unknown;
   viewMode: 'raw' | 'parsed';
-  layoutMode?: 'horizontal' | 'vertical';
 }
 
-function parseZodSchema(schema: unknown): ParsedSchema {
+function parseJsonSchema(schema: unknown): ParsedSchema {
   if (!schema || typeof schema !== 'object') {
     return {
       type: 'unknown',
@@ -32,46 +30,57 @@ function parseZodSchema(schema: unknown): ParsedSchema {
   }
 
   const schemaObj = schema as Record<string, unknown>;
-  console.log('Parsing schema:', schemaObj);
+  
+  // Handle atomic types
+  if (typeof schemaObj.type === 'string' && !schemaObj.properties) {
+    const type = schemaObj.type as string;
+    const description = schemaObj.description as string | undefined;
+    const defaultValue = schemaObj.default;
+    const metadata: Record<string, unknown> = {};
+    
+    if (schemaObj.format) metadata.format = schemaObj.format as string;
+    if (schemaObj.minimum !== undefined) metadata.min = schemaObj.minimum as number;
+    if (schemaObj.maximum !== undefined) metadata.max = schemaObj.maximum as number;
+    if (schemaObj.pattern) metadata.pattern = schemaObj.pattern as string;
+    if (schemaObj.enum) metadata.enum = schemaObj.enum as unknown[];
+    if (schemaObj.examples) metadata.examples = schemaObj.examples as unknown[];
 
-  // Handle non-object schemas
-  if (!('_def' in schemaObj)) {
-    if (Array.isArray(schemaObj)) {
-      return {
-        type: 'array',
-        fields: []
-      };
-    }
     return {
-      type: typeof schemaObj,
-      fields: []
+      type,
+      fields: [{
+        name: 'value',
+        type: getJsonSchemaType(schemaObj),
+        description,
+        required: !schemaObj.nullable,
+        defaultValue,
+        metadata
+      }]
     };
   }
-
-  const def = schemaObj._def as Record<string, unknown>;
-  const typeName = def.typeName as string;
-  console.log('Schema type:', typeName);
-
-  if (typeName === 'ZodObject') {
-    const shape = def.shape as Record<string, unknown>;
-    const fields: SchemaField[] = Object.entries(shape).map(([key, value]) => {
+  
+  // Handle object types
+  if (schemaObj.type === 'object' && schemaObj.properties) {
+    const properties = schemaObj.properties as Record<string, unknown>;
+    const required = (schemaObj.required as string[]) || [];
+    
+    const fields: SchemaField[] = Object.entries(properties).map(([key, value]) => {
       const field = value as Record<string, unknown>;
-      const fieldDef = field._def as Record<string, unknown>;
-      const isOptional = fieldDef.typeName === 'ZodOptional';
-      const innerType = isOptional ? (fieldDef.innerType as Record<string, unknown>) : field;
-      const innerDef = innerType._def as Record<string, unknown>;
-      const description = innerDef.description as string | undefined;
-      const defaultValue = innerDef.defaultValue as unknown;
-      const metadata = innerDef.metadata as Record<string, unknown> | undefined;
+      const metadata: Record<string, unknown> = {};
+      if (field.format) metadata.format = field.format as string;
+      if (field.minimum !== undefined) metadata.min = field.minimum as number;
+      if (field.maximum !== undefined) metadata.max = field.maximum as number;
+      if (field.pattern) metadata.pattern = field.pattern as string;
+      if (field.enum) metadata.enum = field.enum as unknown[];
+      if (field.examples) metadata.examples = field.examples as unknown[];
 
       return {
         name: key,
-        type: getZodType(innerType),
-        description,
-        required: !isOptional,
-        defaultValue,
+        type: getJsonSchemaType(field),
+        description: field.description as string | undefined,
+        required: required.includes(key),
+        defaultValue: field.default,
         metadata,
-        fields: innerDef.typeName === 'ZodObject' ? parseZodSchema(innerType).fields : undefined
+        fields: field.type === 'object' ? parseJsonSchema(field).fields : undefined
       };
     });
 
@@ -81,64 +90,96 @@ function parseZodSchema(schema: unknown): ParsedSchema {
     };
   }
 
+  // Handle array types
+  if (schemaObj.type === 'array' && schemaObj.items) {
+    const items = schemaObj.items as Record<string, unknown>;
+    const metadata: Record<string, unknown> = {};
+    if (schemaObj.minItems !== undefined) metadata.minItems = schemaObj.minItems as number;
+    if (schemaObj.maxItems !== undefined) metadata.maxItems = schemaObj.maxItems as number;
+    if (schemaObj.uniqueItems) metadata.uniqueItems = schemaObj.uniqueItems as boolean;
+
+    return {
+      type: 'array',
+      fields: [{
+        name: 'items',
+        type: getJsonSchemaType(items),
+        description: schemaObj.description as string | undefined,
+        required: true,
+        metadata,
+        fields: items.type === 'object' ? parseJsonSchema(items).fields : undefined
+      }]
+    };
+  }
+
   return {
-    type: typeName,
+    type: schemaObj.type as string || 'unknown',
     fields: []
   };
 }
 
-function getZodType(schema: unknown): string {
-  if (!schema || typeof schema !== 'object') return 'unknown';
-  const def = (schema as Record<string, unknown>)._def as Record<string, unknown>;
-  const typeName = def.typeName as string;
+function getJsonSchemaType(schema: Record<string, unknown>): string {
+  const type = schema.type as string;
+  if (!type) return 'unknown';
 
-  switch (typeName) {
-    case 'ZodString':
-      return 'string';
-    case 'ZodNumber':
-      return 'number';
-    case 'ZodBoolean':
-      return 'boolean';
-    case 'ZodArray':
-      const arrayType = getZodType(def.type as unknown);
-      return `array<${arrayType}>`;
-    case 'ZodObject':
-      return 'object';
-    case 'ZodOptional':
-      return getZodType(def.innerType as unknown);
-    default:
-      return typeName;
+  if (type === 'array' && schema.items) {
+    const items = schema.items as Record<string, unknown>;
+    return `array<${getJsonSchemaType(items)}>`;
   }
+
+  if (type === 'object' && schema.properties) {
+    return 'object';
+  }
+
+  if (schema.enum) {
+    return `enum<${(schema.enum as unknown[]).map(v => JSON.stringify(v)).join(' | ')}>`;
+  }
+
+  if (schema.format) {
+    return `${type}(${schema.format})`;
+  }
+
+  return type;
+}
+
+function formatMetadata(metadata: Record<string, unknown>): string[] {
+  const parts: string[] = [];
+  
+  if (metadata.min !== undefined) parts.push(`min: ${metadata.min}`);
+  if (metadata.max !== undefined) parts.push(`max: ${metadata.max}`);
+  if (metadata.pattern) parts.push(`pattern: ${metadata.pattern}`);
+  if (metadata.format) parts.push(`format: ${metadata.format}`);
+  if (metadata.minItems !== undefined) parts.push(`min: ${metadata.minItems}`);
+  if (metadata.maxItems !== undefined) parts.push(`max: ${metadata.maxItems}`);
+  if (metadata.uniqueItems) parts.push('unique');
+  
+  return parts;
 }
 
 function SchemaFieldView({ field, depth = 0 }: { field: SchemaField; depth?: number }) {
+  const metadataParts = formatMetadata(field.metadata || {});
+  const hasMetadata = metadataParts.length > 0;
+  const hasDefault = field.defaultValue !== undefined;
+  const showParens = hasMetadata || hasDefault || !field.required;
+
   return (
     <div className="space-y-1">
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm">
             <span className="font-medium">{field.name}</span>
-            <span className="text-sm text-muted-foreground">{field.type}</span>
-            {!field.required && (
-              <span className="text-xs text-muted-foreground">(optional)</span>
-            )}
-            {field.defaultValue !== undefined && (
-              <span className="text-xs text-muted-foreground">
-                (default: {JSON.stringify(field.defaultValue)})
+            <span className="text-muted-foreground">{field.type}</span>
+            {showParens && (
+              <span className="text-muted-foreground">
+                ({[
+                  ...(hasMetadata ? [metadataParts.join(', ')] : []),
+                  ...(hasDefault ? [`default: ${JSON.stringify(field.defaultValue)}`] : []),
+                  ...(!field.required ? ['optional'] : [])
+                ].join(', ')})
               </span>
             )}
           </div>
           {field.description && (
             <p className="text-sm text-muted-foreground mt-1">{field.description}</p>
-          )}
-          {field.metadata && Object.keys(field.metadata).length > 0 && (
-            <div className="mt-1 text-xs text-muted-foreground">
-              {Object.entries(field.metadata).map(([key, value]) => (
-                <div key={key}>
-                  {key}: {JSON.stringify(value)}
-                </div>
-              ))}
-            </div>
           )}
         </div>
       </div>
@@ -153,9 +194,9 @@ function SchemaFieldView({ field, depth = 0 }: { field: SchemaField; depth?: num
   );
 }
 
-export function SchemaView({ schema, viewMode, layoutMode = 'horizontal' }: SchemaViewProps) {
+export function SchemaView({ schema, viewMode }: SchemaViewProps) {
   const { theme } = useTheme();
-  const parsedSchema = parseZodSchema(schema);
+  const parsedSchema = parseJsonSchema(schema);
 
   if (viewMode === 'raw') {
     return (

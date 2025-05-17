@@ -1,6 +1,6 @@
 import { initTRPC, AnyTRPCRouter, AnyTRPCProcedure } from '@trpc/server';
-import { inspect } from 'util';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export interface IntrospectionOptions {
   enabled?: boolean;
@@ -25,14 +25,15 @@ function collectProcedures(router: AnyTRPCRouter, parentPath: string[] = []): Pr
   // Collect procedures
   const proceduresEntries = Object.entries(router._def.procedures ?? {}) as [string, AnyTRPCProcedure][];
   for (const [key, proc] of proceduresEntries) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const unsafeProc = proc as any;
     const inputSchema = typeof unsafeProc._def.inputs !== "undefined" ? unsafeProc._def.inputs[0] : null;
     const outputSchema = typeof unsafeProc._def.output !== "undefined" ? unsafeProc._def.output : null;
     procedures.push({
       path: [...parentPath, key].join('.'),
       type: proc._def.type,
-      inputSchema,
-      outputSchema,
+      inputSchema: inputSchema ? zodToJsonSchema(inputSchema) : null,
+      outputSchema: outputSchema ? zodToJsonSchema(outputSchema) : null,
     });
   }
 
@@ -68,91 +69,7 @@ export function addIntrospectionEndpoint<TRouter extends AnyTRPCRouter>(
   });
 }
 
-// Helper function to convert Zod schema to JSON Schema
-export function zodToJsonSchema(schema: unknown): unknown {
-  if (!isZodTypeAny(schema)) return { type: 'unknown' };
-
-  if (schema instanceof z.ZodString) {
-    return {
-      type: 'string',
-      ...(schema._def.checks?.length && {
-        format: schema._def.checks[0].kind,
-      }),
-    };
-  }
-
-  if (schema instanceof z.ZodNumber) {
-    let minimum: number | undefined;
-    let maximum: number | undefined;
-    for (const check of schema._def.checks ?? []) {
-      if (check.kind === 'min' && typeof check.value === 'number') minimum = check.value;
-      if (check.kind === 'max' && typeof check.value === 'number') maximum = check.value;
-    }
-    return {
-      type: 'number',
-      ...(minimum !== undefined && { minimum }),
-      ...(maximum !== undefined && { maximum }),
-    };
-  }
-
-  if (schema instanceof z.ZodBoolean) {
-    return { type: 'boolean' };
-  }
-
-  if (schema instanceof z.ZodArray) {
-    return {
-      type: 'array',
-      items: zodToJsonSchema(schema._def.type as z.ZodTypeAny),
-    };
-  }
-
-  if (schema instanceof z.ZodObject) {
-    const properties: Record<string, unknown> = {};
-    const required: string[] = [];
-
-    for (const [key, value] of Object.entries(schema._def.shape())) {
-      properties[key] = zodToJsonSchema(value);
-      if (!(value instanceof z.ZodOptional)) {
-        required.push(key);
-      }
-    }
-
-    return {
-      type: 'object',
-      properties,
-      ...(required.length > 0 && { required }),
-    };
-  }
-
-  if (schema instanceof z.ZodEnum) {
-    return {
-      type: 'string',
-      enum: schema._def.values,
-    };
-  }
-
-  if (schema instanceof z.ZodOptional) {
-    return zodToJsonSchema(schema._def.innerType as z.ZodTypeAny);
-  }
-
-  if (schema instanceof z.ZodNullable) {
-    const inner = zodToJsonSchema(schema._def.innerType as z.ZodTypeAny);
-    return {
-      type: ['null', ...(typeof inner === 'object' && inner !== null && 'type' in inner && Array.isArray((inner as { type?: unknown }).type)
-        ? (inner as { type: unknown[] }).type
-        : typeof inner === 'object' && inner !== null && 'type' in inner
-        ? [(inner as { type: unknown }).type]
-        : [])],
-    };
-  }
-
-  return { type: 'unknown' };
-}
 
 function isTRPCRouter(val: unknown): val is AnyTRPCRouter {
   return typeof val === 'object' && val !== null && '_def' in val;
 }
-
-function isZodTypeAny(val: unknown): val is z.ZodTypeAny {
-  return typeof val === 'object' && val !== null && '_def' in val;
-} 
