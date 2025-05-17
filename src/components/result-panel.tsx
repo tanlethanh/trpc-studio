@@ -6,7 +6,7 @@ import { type RequestLog } from '@/types/trpc';
 import { type IntrospectionData } from '@/types/trpc';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Clock, Code, CheckCircle2, XCircle } from 'lucide-react';
 
 interface ResultPanelProps {
   activeTab: 'result' | 'history' | 'introspection';
@@ -40,6 +40,7 @@ export function ResultPanel({
   introspectionError
 }: ResultPanelProps) {
   const { theme } = useTheme();
+  const lastLog = requestLogs[requestLogs.length - 1];
 
   return (
     <Card className="w-full flex flex-col border h-full">
@@ -75,26 +76,17 @@ export function ResultPanel({
               }`}
             >
               Introspection
-              {isIntrospectionLoading && (
-                <span className="ml-2 inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              )}
-              {introspectionError && (
-                <span className="ml-2 inline-block w-2 h-2 rounded-full bg-red-500" />
-              )}
-              {!isIntrospectionLoading && !introspectionError && introspectionData && (
-                <span className="ml-2 inline-block w-2 h-2 rounded-full bg-green-500" />
-              )}
             </button>
           </div>
           {activeTab === 'introspection' && (
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon"
               onClick={onReloadIntrospection}
               disabled={isIntrospectionLoading}
+              className="h-8 w-8"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isIntrospectionLoading ? 'animate-spin' : ''}`} />
-              Reload
+              <RefreshCw className={`h-4 w-4 ${isIntrospectionLoading ? 'animate-spin' : ''}`} />
             </Button>
           )}
         </div>
@@ -102,24 +94,53 @@ export function ResultPanel({
 
       <CardContent className="flex-1 p-0 min-h-0 overflow-auto">
         {activeTab === 'result' ? (
-          <div className="h-full">
-            <Editor
-              height="100%"
-              defaultLanguage="json"
-              value={error ? error : JSON.stringify(result, null, 2)}
-              theme={theme === 'dark' ? 'vs-dark' : 'light'}
-              loading={null}
-              options={{
-                readOnly: true,
-                minimap: { enabled: false },
-                fontSize: 13,
-                lineNumbers: 'on',
-                roundedSelection: false,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                padding: { top: 12, bottom: 12 },
-              }}
-            />
+          <div className="h-full flex flex-col">
+            {lastLog && (
+              <div className="flex-none border-b bg-muted/30 p-2">
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    {error ? (
+                      <XCircle className="h-4 w-4 text-destructive" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    )}
+                    <span className="font-medium">
+                      {error ? 'Error' : 'Success'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>{lastLog.duration}ms</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Code className="h-4 w-4" />
+                    <span>{lastLog.procedure}</span>
+                  </div>
+                  <div className="text-muted-foreground">
+                    {new Date(lastLog.timestamp).toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="flex-1">
+              <Editor
+                height="100%"
+                defaultLanguage="json"
+                value={error ? error : JSON.stringify(result, null, 2)}
+                theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                loading={null}
+                options={{
+                  readOnly: true,
+                  minimap: { enabled: false },
+                  fontSize: 13,
+                  lineNumbers: 'on',
+                  roundedSelection: false,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  padding: { top: 12, bottom: 12 },
+                }}
+              />
+            </div>
           </div>
         ) : activeTab === 'history' ? (
           <RequestHistory
