@@ -3,6 +3,7 @@ import Editor from '@monaco-editor/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { type IntrospectionData } from '@/types/trpc';
+import { useTheme } from 'next-themes';
 
 interface QueryEditorProps {
   query: string;
@@ -19,6 +20,8 @@ export function QueryEditor({
   isLoading, 
   introspectionData 
 }: QueryEditorProps) {
+  const { theme } = useTheme();
+
   const handleEditorWillMount = (monaco: Monaco) => {
     monaco.languages.register({ id: 'trpc-query' });
 
@@ -111,7 +114,7 @@ export function QueryEditor({
             defaultLanguage="trpc-query"
             value={query}
             onChange={(value) => setQuery(value || '')}
-            theme="vs-dark"
+            theme={theme === 'dark' ? 'vs-dark' : 'light'}
             beforeMount={handleEditorWillMount}
             options={{
               minimap: { enabled: false },

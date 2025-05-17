@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { type IntrospectionData } from '@/types/trpc';
 import Editor from '@monaco-editor/react';
+import { useTheme } from 'next-themes';
 
 interface IntrospectionViewProps {
   data: IntrospectionData | null;
@@ -16,6 +17,7 @@ export function IntrospectionView({ data }: IntrospectionViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedProcedure, setSelectedProcedure] = useState<IntrospectionData['procedures'][0] | null>(null);
   const [selectedType, setSelectedType] = useState<ProcedureType | 'all'>('all');
+  const { theme } = useTheme();
 
   const filteredProcedures = (data?.procedures ?? []).filter(p => 
     selectedType === 'all' ? true : p.type === selectedType
@@ -78,7 +80,7 @@ export function IntrospectionView({ data }: IntrospectionViewProps) {
                 inputSchema: selectedProcedure.inputSchema,
                 outputSchema: selectedProcedure.outputSchema,
               }, null, 2)}
-              theme="vs-dark"
+              theme={theme === 'dark' ? 'vs-dark' : 'light'}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },

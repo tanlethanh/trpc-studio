@@ -4,6 +4,7 @@ import { RequestHistory } from './request-history';
 import { IntrospectionView } from './introspection-view';
 import { type RequestLog } from '@/types/trpc';
 import { type IntrospectionData } from '@/types/trpc';
+import { useTheme } from 'next-themes';
 
 interface ResultPanelProps {
   activeTab: 'result' | 'history' | 'introspection';
@@ -30,30 +31,45 @@ export function ResultPanel({
   isLoading,
   introspectionData
 }: ResultPanelProps) {
+  const { theme } = useTheme();
+
   return (
     <Card className="w-full flex flex-col border h-full">
       <CardHeader className="flex-none border-b bg-muted/30 py-2">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <button
-            className={`px-4 py-1 rounded-t text-sm font-medium focus:outline-none ${activeTab === 'result' ? 'bg-background border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
             onClick={() => setActiveTab('result')}
+            className={`px-3 py-1 text-sm rounded-md ${
+              activeTab === 'result'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
           >
             Result
           </button>
           <button
-            className={`px-4 py-1 rounded-t text-sm font-medium focus:outline-none ${activeTab === 'history' ? 'bg-background border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
             onClick={() => setActiveTab('history')}
+            className={`px-3 py-1 text-sm rounded-md ${
+              activeTab === 'history'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
           >
             History
           </button>
           <button
-            className={`px-4 py-1 rounded-t text-sm font-medium focus:outline-none ${activeTab === 'introspection' ? 'bg-background border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
             onClick={() => setActiveTab('introspection')}
+            className={`px-3 py-1 text-sm rounded-md ${
+              activeTab === 'introspection'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
           >
             Introspection
           </button>
         </div>
       </CardHeader>
+
       <CardContent className="flex-1 p-0 min-h-0 overflow-auto">
         {activeTab === 'result' ? (
           <div className="h-full">
@@ -61,7 +77,7 @@ export function ResultPanel({
               height="100%"
               defaultLanguage="json"
               value={error ? error : JSON.stringify(result, null, 2)}
-              theme="vs-dark"
+              theme={theme === 'dark' ? 'vs-dark' : 'light'}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },
