@@ -32,10 +32,11 @@ export function ProcedureInputPanel({
           // For object fields, only include the field inputs
           const fieldInputs: Record<string, string> = {};
           fields.forEach(field => {
+            const value = queryObj.input[field.name];
             if (field.isAtomic) {
-              fieldInputs[field.name] = String(queryObj.input[field.name] || '');
-            } else if (queryObj.input[field.name] !== '{}') {
-              fieldInputs[field.name] = String(queryObj.input[field.name] || '');
+              fieldInputs[field.name] = String(value || '');
+            } else if (value !== undefined && value !== null) {
+              fieldInputs[field.name] = typeof value === 'string' ? value : JSON.stringify(value);
             }
           });
           setInputValues(fieldInputs);
@@ -81,20 +82,23 @@ export function ProcedureInputPanel({
       const queryObj = JSON.parse(query);
       const newQuery = {
         ...queryObj,
-        input: isAtomicType ? value : newInputValues
+        input: isAtomicType ? value : {}
       };
 
-      // For object fields, only include the field inputs
-      if (typeof newQuery.input === 'object' && newQuery.input !== null) {
-        const fieldInputs: Record<string, string> = {};
+      // For object fields, parse the values based on their types
+      if (!isAtomicType) {
         fields.forEach(field => {
-          if (field.isAtomic) {
-            fieldInputs[field.name] = String(newQuery.input[field.name] || '');
-          } else if (newQuery.input[field.name] !== '{}') {
-            fieldInputs[field.name] = String(newQuery.input[field.name] || '');
+          const value = newInputValues[field.name];
+          if (value !== undefined) {
+            try {
+              // Try to parse as JSON for object/array types
+              newQuery.input[field.name] = JSON.parse(value);
+            } catch {
+              // If parsing fails, use the string value
+              newQuery.input[field.name] = value;
+            }
           }
         });
-        newQuery.input = fieldInputs;
       }
 
       setQuery(JSON.stringify(newQuery, null, 2));
@@ -105,15 +109,60 @@ export function ProcedureInputPanel({
 
   const handleProcedureChange = useCallback((value: string) => {
     try {
-      const newQuery = {
-        procedure: value,
-        input: {}
-      };
-      setQuery(JSON.stringify(newQuery, null, 2));
+      const procedure = introspectionData?.procedures.find(p => p.path === value);
+      if (!procedure?.inputSchema) {
+        setQuery(JSON.stringify({ procedure: value, input: {} }, null, 2));
+        return;
+      }
+
+      const parsedFields = parseJsonSchema(procedure.inputSchema);
+      const isAtomic = parsedFields.length === 1 && parsedFields[0].name === 'value';
+      
+      if (isAtomic) {
+        const defaultValue = parsedFields[0].defaultValue ?? '';
+        setQuery(JSON.stringify({ 
+          procedure: value, 
+          input: defaultValue 
+        }, null, 2));
+      } else {
+        const defaultInput: Record<string, unknown> = {};
+        parsedFields.forEach(field => {
+          if (field.defaultValue !== undefined) {
+            defaultInput[field.name] = field.defaultValue;
+          } else {
+            // Set type-specific defaults
+            switch (field.type) {
+              case 'string':
+                defaultInput[field.name] = '';
+                break;
+              case 'number':
+              case 'integer':
+                defaultInput[field.name] = 0;
+                break;
+              case 'boolean':
+                defaultInput[field.name] = false;
+                break;
+              case 'array':
+                defaultInput[field.name] = [];
+                break;
+              case 'object':
+                defaultInput[field.name] = {};
+                break;
+              default:
+                defaultInput[field.name] = null;
+            }
+          }
+        });
+        setQuery(JSON.stringify({ 
+          procedure: value, 
+          input: defaultInput 
+        }, null, 2));
+      }
     } catch {
       // Invalid JSON, ignore
+      setQuery(JSON.stringify({ procedure: value, input: {} }, null, 2));
     }
-  }, [setQuery]);
+  }, [introspectionData, setQuery]);
 
   return (
     <div className="flex flex-col h-full">

@@ -11,7 +11,12 @@ interface ObjectInputProps {
 export function ObjectInput({ field, value, onChange }: ObjectInputProps) {
   if (!field.fields) return null;
 
-  const values = value ? JSON.parse(value) : {};
+  let values: Record<string, unknown>;
+  try {
+    values = typeof value === 'string' ? JSON.parse(value) : (value || {});
+  } catch {
+    values = {};
+  }
 
   const handleFieldChange = (fieldName: string, fieldValue: string) => {
     const newValues = { ...values, [fieldName]: fieldValue };
@@ -32,7 +37,7 @@ export function ObjectInput({ field, value, onChange }: ObjectInputProps) {
           <SchemaInput
             key={subField.name}
             field={subField}
-            value={values[subField.name] || ''}
+            value={String(values[subField.name] || '')}
             onChange={(value) => handleFieldChange(subField.name, value)}
           />
         ))}
