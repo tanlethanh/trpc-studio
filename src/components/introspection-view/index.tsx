@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, LayoutGrid, LayoutList } from 'lucide-react';
 import { type IntrospectionData } from '@/types/trpc';
 import { ProcedureList } from './procedure-list';
 import { SchemaView } from './schema-view';
-import { useTheme } from 'next-themes';
 
 interface IntrospectionViewProps {
   data: IntrospectionData | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
 type ViewMode = 'list' | 'detail';
@@ -16,13 +17,12 @@ type ProcedureType = 'query' | 'mutation' | 'subscription';
 type SchemaViewMode = 'raw' | 'parsed';
 type LayoutMode = 'horizontal' | 'vertical';
 
-export function IntrospectionView({ data }: IntrospectionViewProps) {
+export function IntrospectionView({ data, isLoading, error }: IntrospectionViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedProcedure, setSelectedProcedure] = useState<IntrospectionData['procedures'][0] | null>(null);
   const [selectedType, setSelectedType] = useState<ProcedureType | 'all'>('all');
   const [schemaViewMode, setSchemaViewMode] = useState<SchemaViewMode>('parsed');
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('horizontal');
-  const { theme } = useTheme();
 
   const handleProcedureClick = (procedure: IntrospectionData['procedures'][0]) => {
     setSelectedProcedure(procedure);
@@ -33,6 +33,22 @@ export function IntrospectionView({ data }: IntrospectionViewProps) {
     setViewMode('list');
     setSelectedProcedure(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-4 text-sm text-muted-foreground text-center">
+        Loading introspection data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-sm text-red-500 text-center">
+        {error}
+      </div>
+    );
+  }
 
   if (!data) {
     return (

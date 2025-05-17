@@ -5,6 +5,8 @@ import { IntrospectionView } from './introspection-view';
 import { type RequestLog } from '@/types/trpc';
 import { type IntrospectionData } from '@/types/trpc';
 import { useTheme } from 'next-themes';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 interface ResultPanelProps {
   activeTab: 'result' | 'history' | 'introspection';
@@ -17,6 +19,9 @@ interface ResultPanelProps {
   replayQuery: (log: RequestLog) => void;
   isLoading: boolean;
   introspectionData: IntrospectionData | null;
+  onReloadIntrospection: () => void;
+  isIntrospectionLoading: boolean;
+  introspectionError: string | null;
 }
 
 export function ResultPanel({ 
@@ -29,44 +34,69 @@ export function ResultPanel({
   toggleLog, 
   replayQuery, 
   isLoading,
-  introspectionData
+  introspectionData,
+  onReloadIntrospection,
+  isIntrospectionLoading,
+  introspectionError
 }: ResultPanelProps) {
   const { theme } = useTheme();
 
   return (
     <Card className="w-full flex flex-col border h-full">
       <CardHeader className="flex-none border-b bg-muted/30 py-2">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('result')}
-            className={`px-3 py-1 text-sm rounded-md ${
-              activeTab === 'result'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            Result
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`px-3 py-1 text-sm rounded-md ${
-              activeTab === 'history'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            History
-          </button>
-          <button
-            onClick={() => setActiveTab('introspection')}
-            className={`px-3 py-1 text-sm rounded-md ${
-              activeTab === 'introspection'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            Introspection
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('result')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                activeTab === 'result'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              Result
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                activeTab === 'history'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              History
+            </button>
+            <button
+              onClick={() => setActiveTab('introspection')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                activeTab === 'introspection'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              Introspection
+              {isIntrospectionLoading && (
+                <span className="ml-2 inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              )}
+              {introspectionError && (
+                <span className="ml-2 inline-block w-2 h-2 rounded-full bg-red-500" />
+              )}
+              {!isIntrospectionLoading && !introspectionError && introspectionData && (
+                <span className="ml-2 inline-block w-2 h-2 rounded-full bg-green-500" />
+              )}
+            </button>
+          </div>
+          {activeTab === 'introspection' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onReloadIntrospection}
+              disabled={isIntrospectionLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isIntrospectionLoading ? 'animate-spin' : ''}`} />
+              Reload
+            </Button>
+          )}
         </div>
       </CardHeader>
 
@@ -100,7 +130,11 @@ export function ResultPanel({
             isLoading={isLoading}
           />
         ) : (
-          <IntrospectionView data={introspectionData} />
+          <IntrospectionView 
+            data={introspectionData} 
+            isLoading={isIntrospectionLoading}
+            error={introspectionError}
+          />
         )}
       </CardContent>
     </Card>

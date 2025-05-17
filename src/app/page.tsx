@@ -25,7 +25,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [trpcUrl]);
 
-  const { introspectionData, fetchIntrospection } = useIntrospection(debouncedUrl);
+  const { introspectionData, fetchIntrospection, isLoading: isIntrospectionLoading, error: introspectionError } = useIntrospection(debouncedUrl);
   const { 
     result, 
     error, 
@@ -132,6 +132,9 @@ export default function Home() {
             replayQuery={handleReplayQuery}
             isLoading={isLoading}
             introspectionData={introspectionData}
+            onReloadIntrospection={fetchIntrospection}
+            isIntrospectionLoading={isIntrospectionLoading}
+            introspectionError={introspectionError}
           />
         </div>
       </div>
@@ -139,6 +142,7 @@ export default function Home() {
   );
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 function getDefaultInputForSchema(schema: any): any {
   if (!schema) return {};
   
