@@ -32,7 +32,7 @@ const OrderSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
-const NotificationSchema = z.object({
+export const NotificationSchema = z.object({
   id: z.string(),
   type: z.enum(['order_status', 'stock_alert', 'price_change']),
   message: z.string(),
@@ -205,7 +205,7 @@ export const complexRouter = createTRPCRouter({
           if (Math.random() > 0.7) {
             const newNotification: z.infer<typeof NotificationSchema> = {
               id: Math.random().toString(36).substring(7),
-              type: ['order_status', 'stock_alert', 'price_change'][Math.floor(Math.random() * 3)] as any,
+              type: ['order_status', 'stock_alert', 'price_change'][Math.floor(Math.random() * 3)] as z.infer<typeof NotificationSchema>['type'],
               message: `New notification for user ${input.userId}`,
               read: false,
               createdAt: new Date().toISOString(),

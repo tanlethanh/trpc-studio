@@ -1,21 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
-
-type AppParamsType = typeof AppParams;
-
 type ParamValue = string | null;
-
-type NestedParams = {
-    [K in keyof AppParamsType]: NestedValue<AppParamsType[K]>;
-};
-
-type NestedValue<T> = T extends object
-    ? { [P in keyof T]: NestedValue<T[P]> }
-    : ParamValue;
 
 type NestedRecord = {
     [key: string]: ParamValue | NestedRecord;

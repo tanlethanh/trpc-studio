@@ -38,7 +38,6 @@ const SearchSchema = z.object({
 });
 
 type User = z.infer<typeof UserSchema>;
-type SearchInput = z.infer<typeof SearchSchema>;
 
 // Example data
 const users: User[] = [

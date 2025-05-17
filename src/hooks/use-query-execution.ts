@@ -20,6 +20,7 @@ export function useQueryExecution(trpcUrl: string) {
       });
 
       // Use dynamic procedure call
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await (client as any)[procedure].query(input);
       const endTime = performance.now();
       
