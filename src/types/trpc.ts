@@ -14,4 +14,5 @@ export interface RequestLog {
   duration: number;
   status: 'success' | 'error';
   error?: string;
+  result?: unknown;
 } 

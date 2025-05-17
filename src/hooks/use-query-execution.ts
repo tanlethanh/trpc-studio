@@ -30,7 +30,8 @@ export function useQueryExecution(trpcUrl: string) {
         procedure,
         input,
         duration: Math.round(endTime - startTime),
-        status: 'success' as const
+        status: 'success' as const,
+        result
       }, ...prev].slice(0, 10));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
