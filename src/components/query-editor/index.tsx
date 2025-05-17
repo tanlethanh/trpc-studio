@@ -29,13 +29,30 @@ export function QueryEditor({
 }: QueryEditorProps) {
   const disposableRef = useRef<any>(null);
   const { settings, updateEditorSettings } = useSettings();
+  const editorRef = useRef<any>(null);
+  const monacoRef = useRef<Monaco | null>(null);
 
   const handleEditorMount = (editor: any, monaco: Monaco) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
     const disposable = setupCompletionProvider(monaco, introspectionData);
     if (disposable) {
       disposableRef.current = disposable;
     }
   };
+
+  // Update schema when procedure changes
+  useEffect(() => {
+    if (editorRef.current && disposableRef.current && monacoRef.current) {
+      // Dispose old provider
+      disposableRef.current.dispose();
+      // Create new provider with updated schema
+      const disposable = setupCompletionProvider(monacoRef.current, introspectionData);
+      if (disposable) {
+        disposableRef.current = disposable;
+      }
+    }
+  }, [introspectionData, query]);
 
   // Cleanup on unmount
   useEffect(() => {

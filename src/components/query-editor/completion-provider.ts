@@ -1,38 +1,137 @@
 import { type Monaco } from '@monaco-editor/react';
 import { type IntrospectionData } from '@/types/trpc';
 
-export function setupCompletionProvider(monaco: Monaco, introspectionData: IntrospectionData | null) {
-  // Remove existing providers
-  monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-    validate: true,
-    allowComments: true,
-    schemas: [],
-  });
+interface JsonSchema {
+  type?: string;
+  properties?: Record<string, JsonSchema>;
+  required?: string[];
+  description?: string;
+  default?: unknown;
+  enum?: unknown[];
+  oneOf?: JsonSchema[];
+  if?: JsonSchema;
+  then?: JsonSchema;
+  const?: unknown;
+  format?: string;
+  minimum?: number;
+  maximum?: number;
+  pattern?: string;
+  examples?: unknown[];
+  minItems?: number;
+  maxItems?: number;
+  uniqueItems?: boolean;
+  items?: JsonSchema;
+  additionalProperties?: boolean | JsonSchema;
+  nullable?: boolean;
+  readOnly?: boolean;
+  writeOnly?: boolean;
+  deprecated?: boolean;
+  title?: string;
+  multipleOf?: number;
+  exclusiveMinimum?: number;
+  exclusiveMaximum?: number;
+  minLength?: number;
+  maxLength?: number;
+  minProperties?: number;
+  maxProperties?: number;
+  dependencies?: Record<string, string[] | JsonSchema>;
+  allOf?: JsonSchema[];
+  anyOf?: JsonSchema[];
+  not?: JsonSchema;
+  definitions?: Record<string, JsonSchema>;
+  $ref?: string;
+  $schema?: string;
+}
 
-  // Only register provider if we have introspection data
+export function setupCompletionProvider(monaco: Monaco, introspectionData: IntrospectionData | null) {
   if (!introspectionData) {
     return null;
   }
 
-  // Add our custom completion provider
+  // Create a base schema for the query format
+  const baseSchema: JsonSchema = {
+    type: 'object',
+    required: ['procedure', 'input'],
+    properties: {
+      procedure: {
+        type: 'string',
+        enum: introspectionData.procedures.map(p => p.path),
+        description: 'The tRPC procedure to call'
+      },
+      input: {
+        oneOf: [
+          { type: 'object', additionalProperties: true },
+          { type: 'string' },
+          { type: 'number' },
+          { type: 'boolean' },
+          { type: 'array' },
+          { type: 'null' }
+        ]
+      }
+    }
+  };
+
+  // Function to update the schema based on the selected procedure
+  function updateSchema(model: ReturnType<Monaco['editor']['createModel']>) {
+    const content = model.getValue();
+    const procedureMatch = content.match(/"procedure"\s*:\s*"([^"]+)"/);
+    if (!procedureMatch) return;
+
+    const procedurePath = procedureMatch[1];
+    const procedure = introspectionData?.procedures.find(p => p.path === procedurePath);
+    if (!procedure) return;
+
+    const inputSchema = procedure.inputSchema as JsonSchema;
+    const schema = {
+      ...baseSchema,
+      properties: {
+        ...baseSchema.properties,
+        input: {
+          ...inputSchema,
+          additionalProperties: true
+        }
+      }
+    };
+
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      allowComments: true,
+      schemas: [{
+        uri: 'trpc-query-schema',
+        fileMatch: ['*'],
+        schema
+      }]
+    });
+  }
+
+  // Initial schema setup
+  monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+    validate: true,
+    allowComments: true,
+    schemas: [{
+      uri: 'trpc-query-schema',
+      fileMatch: ['*'],
+      schema: baseSchema
+    }]
+  });
+
+  // Add our custom completion provider for procedure suggestions and schema updates
   return monaco.languages.registerCompletionItemProvider('json', {
-    triggerCharacters: ['"', '.', ':'],
+    triggerCharacters: ['"'],
     provideCompletionItems: (model, position) => {
       const word = model.getWordAtPosition(position);
       const lineContent = model.getLineContent(position.lineNumber);
       const beforeCursor = lineContent.substring(0, position.column - 1);
       
-      // Check if we're in the procedure field
-      const isInProcedureField = beforeCursor.includes('"procedure"') && 
-        !beforeCursor.includes('"input"') &&
-        !beforeCursor.includes('"output"') &&
-        beforeCursor.includes(':');
-
-      // Check if we're in the input field
-      const isInInputField = beforeCursor.includes('"input"') && 
-        beforeCursor.includes(':');
-
-      if (isInProcedureField) {
+      // Update schema when procedure changes
+      updateSchema(model);
+      
+      // Only provide custom completions for the procedure field
+      if (beforeCursor.includes('"procedure"') && 
+          !beforeCursor.includes('"input"') &&
+          !beforeCursor.includes('"output"') &&
+          beforeCursor.includes(':')) {
+        
         const range = {
           startLineNumber: position.lineNumber,
           endLineNumber: position.lineNumber,
@@ -66,73 +165,7 @@ export function setupCompletionProvider(monaco: Monaco, introspectionData: Intro
         return { suggestions };
       }
 
-      if (isInInputField) {
-        // Find the current procedure
-        const procedureMatch = model.getValue().match(/"procedure"\s*:\s*"([^"]+)"/);
-        if (procedureMatch) {
-          const procedurePath = procedureMatch[1];
-          const procedure = introspectionData.procedures.find(p => p.path === procedurePath);
-          
-          if (procedure?.inputSchema) {
-            const schema = procedure.inputSchema as Record<string, unknown>;
-            const def = schema._def as Record<string, unknown>;
-            
-            if ('shape' in def) {
-              const shape = def.shape as Record<string, unknown>;
-              const range = {
-                startLineNumber: position.lineNumber,
-                endLineNumber: position.lineNumber,
-                startColumn: word?.startColumn ?? position.column,
-                endColumn: word?.endColumn ?? position.column,
-              };
-
-              const suggestions = Object.entries(shape).map(([key, value]) => {
-                const field = value as Record<string, unknown>;
-                const fieldDef = field._def as Record<string, unknown>;
-                const type = fieldDef.typeName as string;
-                const description = fieldDef.description as string | undefined;
-                const defaultValue = fieldDef.defaultValue as unknown;
-                const isOptional = fieldDef.typeName === 'ZodOptional';
-
-                return {
-                  label: key,
-                  kind: monaco.languages.CompletionItemKind.Property,
-                  insertText: `"${key}": ${getDefaultValueForType(type)}`,
-                  detail: `${type}${isOptional ? ' (optional)' : ''}`,
-                  documentation: {
-                    value: [
-                      description ? `**Description:** ${description}` : '',
-                      defaultValue !== undefined ? `**Default:** ${JSON.stringify(defaultValue)}` : '',
-                    ].filter(Boolean).join('\n\n'),
-                  },
-                  range,
-                };
-              });
-
-              return { suggestions };
-            }
-          }
-        }
-      }
-
       return { suggestions: [] };
     },
   });
-}
-
-function getDefaultValueForType(type: string): string {
-  switch (type) {
-    case 'ZodString':
-      return '""';
-    case 'ZodNumber':
-      return '0';
-    case 'ZodBoolean':
-      return 'false';
-    case 'ZodArray':
-      return '[]';
-    case 'ZodObject':
-      return '{}';
-    default:
-      return 'null';
-  }
 } 
