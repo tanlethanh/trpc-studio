@@ -108,16 +108,14 @@ export default function Home() {
 
       <div id="main-panels" className="flex flex-1 min-h-0 p-4 gap-0" style={{ position: 'relative' }}>
         <div style={{ width: `${leftWidth}%` }} className="h-full flex flex-col">
-          {introspectionData && (
-            <QueryEditor
-              key={JSON.stringify(introspectionData)}
-              query={query}
-              setQuery={setQuery}
-              runQuery={runQuery}
-              isLoading={isLoading}
-              introspectionData={introspectionData}
-            />
-          )}
+          <QueryEditor
+            key={JSON.stringify(introspectionData)}
+            query={query}
+            setQuery={setQuery}
+            runQuery={runQuery}
+            isLoading={isLoading}
+            introspectionData={introspectionData}
+          />
         </div>
 
         <ResizableDivider onMouseDown={handleMouseDown} />
