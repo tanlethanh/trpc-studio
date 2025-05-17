@@ -1,4 +1,5 @@
-import { initTRPC, type AnyRouter } from '@trpc/server';
+import { initTRPC, AnyTRPCRouter, AnyTRPCProcedure } from '@trpc/server';
+import { inspect } from 'util';
 import { z } from 'zod';
 
 export interface IntrospectionOptions {
@@ -18,23 +19,25 @@ export interface RouterInfo {
 }
 
 // Helper to recursively collect procedures from a router
-function collectProcedures(router: AnyRouter, parentPath: string[] = []): ProcedureInfo[] {
+function collectProcedures(router: AnyTRPCRouter, parentPath: string[] = []): ProcedureInfo[] {
   const procedures: ProcedureInfo[] = [];
-  const def = (router as { _def?: { procedures?: Record<string, unknown>; record?: Record<string, unknown> } })._def;
-  if (!def) return procedures;
 
   // Collect procedures
-  for (const [key, proc] of Object.entries(def.procedures ?? {})) {
-    const procDef = (proc as { _def?: { mutation?: boolean; subscription?: boolean; inputs?: unknown[]; output?: unknown } })._def;
+  const proceduresEntries = Object.entries(router._def.procedures ?? {}) as [string, AnyTRPCProcedure][];
+  for (const [key, proc] of proceduresEntries) {
+    const unsafeProc = proc as any;
+    const inputSchema = typeof unsafeProc._def.inputs !== "undefined" ? unsafeProc._def.inputs[0] : null;
+    const outputSchema = typeof unsafeProc._def.output !== "undefined" ? unsafeProc._def.output : null;
     procedures.push({
       path: [...parentPath, key].join('.'),
-      type: procDef && procDef.mutation ? 'mutation' : procDef && procDef.subscription ? 'subscription' : 'query',
-      inputSchema: procDef?.inputs?.[0] ?? null,
-      outputSchema: procDef?.output ?? null,
+      type: proc._def.type,
+      inputSchema,
+      outputSchema,
     });
   }
+
   // Recurse into subrouters
-  for (const [key, sub] of Object.entries(def.record ?? {})) {
+  for (const [key, sub] of Object.entries(router._def.record ?? {})) {
     if (isTRPCRouter(sub)) {
       procedures.push(...collectProcedures(sub, [...parentPath, key]));
     }
@@ -42,7 +45,7 @@ function collectProcedures(router: AnyRouter, parentPath: string[] = []): Proced
   return procedures;
 }
 
-export function addIntrospectionEndpoint<TRouter extends AnyRouter>(
+export function addIntrospectionEndpoint<TRouter extends AnyTRPCRouter>(
   router: TRouter,
   options: IntrospectionOptions = {}
 ): TRouter {
@@ -146,7 +149,7 @@ export function zodToJsonSchema(schema: unknown): unknown {
   return { type: 'unknown' };
 }
 
-function isTRPCRouter(val: unknown): val is AnyRouter {
+function isTRPCRouter(val: unknown): val is AnyTRPCRouter {
   return typeof val === 'object' && val !== null && '_def' in val;
 }
 
