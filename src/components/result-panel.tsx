@@ -1,11 +1,13 @@
 import Editor from '@monaco-editor/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { RequestHistory } from './request-history';
+import { IntrospectionView } from './introspection-view';
 import { type RequestLog } from '@/types/trpc';
+import { type IntrospectionData } from '@/types/trpc';
 
 interface ResultPanelProps {
-  activeTab: 'result' | 'history';
-  setActiveTab: (tab: 'result' | 'history') => void;
+  activeTab: 'result' | 'history' | 'introspection';
+  setActiveTab: (tab: 'result' | 'history' | 'introspection') => void;
   result: unknown;
   error: string | null;
   requestLogs: RequestLog[];
@@ -13,6 +15,7 @@ interface ResultPanelProps {
   toggleLog: (index: number) => void;
   replayQuery: (log: RequestLog) => void;
   isLoading: boolean;
+  introspectionData: IntrospectionData | null;
 }
 
 export function ResultPanel({ 
@@ -24,7 +27,8 @@ export function ResultPanel({
   expandedLogs, 
   toggleLog, 
   replayQuery, 
-  isLoading 
+  isLoading,
+  introspectionData
 }: ResultPanelProps) {
   return (
     <Card className="w-full flex flex-col border h-full">
@@ -41,6 +45,12 @@ export function ResultPanel({
             onClick={() => setActiveTab('history')}
           >
             History
+          </button>
+          <button
+            className={`px-4 py-1 rounded-t text-sm font-medium focus:outline-none ${activeTab === 'introspection' ? 'bg-background border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+            onClick={() => setActiveTab('introspection')}
+          >
+            Introspection
           </button>
         </div>
       </CardHeader>
@@ -64,7 +74,7 @@ export function ResultPanel({
               }}
             />
           </div>
-        ) : (
+        ) : activeTab === 'history' ? (
           <RequestHistory
             logs={requestLogs}
             expandedLogs={expandedLogs}
@@ -72,6 +82,8 @@ export function ResultPanel({
             replayQuery={replayQuery}
             isLoading={isLoading}
           />
+        ) : (
+          <IntrospectionView data={introspectionData} />
         )}
       </CardContent>
     </Card>

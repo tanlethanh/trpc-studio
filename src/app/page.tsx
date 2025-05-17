@@ -13,6 +13,7 @@ import { usePanelResize } from '@/hooks/use-panel-resize';
 
 export default function Home() {
   const [trpcUrl, setTrpcUrl] = useState('http://localhost:3000/api/trpc');
+  const [debouncedUrl, setDebouncedUrl] = useState(trpcUrl);
   const [query, setQuery] = useState(`{
   "procedure": "complex.getProducts",
   "input": {
@@ -25,9 +26,17 @@ export default function Home() {
     "sortOrder": "asc"
   }
 }`);
-  const [activeTab, setActiveTab] = useState<'result' | 'history'>('result');
+  const [activeTab, setActiveTab] = useState<'result' | 'history' | 'introspection'>('result');
 
-  const { introspectionData, fetchIntrospection } = useIntrospection(trpcUrl);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedUrl(trpcUrl);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [trpcUrl]);
+
+  const { introspectionData, fetchIntrospection } = useIntrospection(debouncedUrl);
   const { 
     result, 
     error, 
@@ -120,6 +129,7 @@ export default function Home() {
             toggleLog={toggleLog}
             replayQuery={handleReplayQuery}
             isLoading={isLoading}
+            introspectionData={introspectionData}
           />
         </div>
       </div>
