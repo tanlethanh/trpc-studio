@@ -117,19 +117,21 @@ export function ProcedureInputPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <Button
-        variant="ghost"
-        className="w-full flex items-center justify-between p-2 hover:bg-muted/50 h-10"
-      >
-        <span className="text-sm font-medium">Procedure Input</span>
-      </Button>
+      <div className='flex flex-row gap-2 border-b items-center'>
+        <Button
+          variant="ghost"
+          className="flex items-center justify-between p-2 hover:bg-muted/50 h-10"
+        >
+          <span className="text-sm font-medium">Procedure Input</span>
+        </Button>
+        <ProcedureSelector
+          introspectionData={introspectionData}
+          currentProcedure={currentProcedure}
+          onProcedureChange={handleProcedureChange}
+        />
+      </div>
       <div className="flex-1 min-h-0 overflow-hidden">
         <div className="h-full flex flex-col">
-          <ProcedureSelector
-            introspectionData={introspectionData}
-            currentProcedure={currentProcedure}
-            onProcedureChange={handleProcedureChange}
-          />
           <div className="flex-1 overflow-auto">
             <InputFields
               fields={fields}
