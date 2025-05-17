@@ -78,6 +78,7 @@ export const exampleRouter = createTRPCRouter({
   // Basic query with simple input/output
   hello: publicProcedure
     .input(z.string())
+    .output(z.string())
     .query(({ input }) => {
       return `Hello ${input}!`;
     }),
@@ -85,6 +86,13 @@ export const exampleRouter = createTRPCRouter({
   // Query with complex input schema and pagination
   getUsers: publicProcedure
     .input(SearchSchema)
+    .output(z.object({
+      users: z.array(UserSchema),
+      total: z.number(),
+      page: z.number(),
+      limit: z.number(),
+      totalPages: z.number(),
+    }))
     .query(({ input }) => {
       const { query, filters, pagination } = input;
       const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = pagination || {};
@@ -139,6 +147,11 @@ export const exampleRouter = createTRPCRouter({
   // Mutation with complex input validation
   createUser: publicProcedure
     .input(UserSchema)
+    .output(z.object({
+      success: z.boolean(),
+      user: UserSchema,
+      message: z.string(),
+    }))
     .mutation(({ input }) => {
       // In a real app, you would save to a database
       return {
@@ -151,6 +164,7 @@ export const exampleRouter = createTRPCRouter({
   // Query with error handling
   getUserById: publicProcedure
     .input(z.string())
+    .output(UserSchema)
     .query(({ input }) => {
       const user = users.find(u => u.id === input);
       if (!user) {
@@ -164,6 +178,10 @@ export const exampleRouter = createTRPCRouter({
     .input(z.object({
       delay: z.number().min(0).max(5000),
       shouldFail: z.boolean().optional(),
+    }))
+    .output(z.object({
+      message: z.string(),
+      timestamp: z.string(),
     }))
     .query(async ({ input }) => {
       const { delay, shouldFail } = input;
@@ -185,6 +203,13 @@ export const exampleRouter = createTRPCRouter({
     .input(z.object({
       userId: z.string(),
       includeMetadata: z.boolean().optional(),
+    }))
+    .output(z.object({
+      basic: z.object({
+        name: z.string(),
+        email: z.string(),
+        age: z.number(),
+      }),
     }))
     .query(({ input }) => {
       const user = users.find(u => u.id === input.userId);

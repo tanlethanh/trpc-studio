@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc';
 import { observable } from '@trpc/server/observable';
+import type { Observer } from '@trpc/server/observable';
 
 // Complex schemas
 const ProductSchema = z.object({
@@ -82,6 +83,7 @@ export const complexRouter = createTRPCRouter({
       sortBy: z.enum(['name', 'price', 'stock']).default('name'),
       sortOrder: z.enum(['asc', 'desc']).default('asc'),
     }))
+    .output(z.array(ProductSchema))
     .query(({ input }) => {
       let filtered = [...products];
 
@@ -139,6 +141,7 @@ export const complexRouter = createTRPCRouter({
         zipCode: z.string(),
       }),
     }))
+    .output(OrderSchema)
     .mutation(({ input }) => {
       // Validate products exist and have enough stock
       for (const item of input.products) {
@@ -189,12 +192,13 @@ export const complexRouter = createTRPCRouter({
       userId: z.string(),
     }))
     .subscription(({ input }) => {
-      return observable<z.infer<typeof NotificationSchema>>((emit) => {
+      return observable<{ notification: z.infer<typeof NotificationSchema> }>((emit: Observer<{ notification: z.infer<typeof NotificationSchema> }, unknown>) => {
+        const queue: z.infer<typeof NotificationSchema>[] = [];
+        let isRunning = true;
+
         // Initial notifications
         const userNotifications = notifications.filter(n => !n.read);
-        for (const notification of userNotifications) {
-          emit.next(notification);
-        }
+        queue.push(...userNotifications);
 
         // Simulate new notifications
         const interval = setInterval(() => {
@@ -207,11 +211,23 @@ export const complexRouter = createTRPCRouter({
               createdAt: new Date().toISOString(),
             };
             notifications.push(newNotification);
-            emit.next(newNotification);
+            queue.push(newNotification);
           }
         }, 5000);
 
+        // Process queue
+        const processQueue = () => {
+          if (!isRunning) return;
+          if (queue.length > 0) {
+            const notification = queue.shift()!;
+            emit.next({ notification });
+          }
+          setTimeout(processQueue, 100);
+        };
+        processQueue();
+
         return () => {
+          isRunning = false;
           clearInterval(interval);
         };
       });
@@ -225,6 +241,22 @@ export const complexRouter = createTRPCRouter({
         start: z.string().datetime(),
         end: z.string().datetime(),
       }),
+    }))
+    .output(z.object({
+      totalOrders: z.number(),
+      totalSpent: z.number(),
+      statusBreakdown: z.record(z.number()),
+      popularProducts: z.array(z.object({
+        product: z.object({
+          id: z.string(),
+          name: z.string(),
+          price: z.number(),
+          stock: z.number(),
+          categories: z.array(z.string()),
+          metadata: z.record(z.unknown()).optional(),
+        }),
+        quantity: z.number(),
+      })),
     }))
     .query(({ input }) => {
       const userOrders = orders.filter(order => 
@@ -258,10 +290,22 @@ export const complexRouter = createTRPCRouter({
         totalSpent,
         statusBreakdown: statusCounts,
         popularProducts: Object.entries(popularProducts)
-          .map(([productId, count]) => ({
-            product: products.find(p => p.id === productId),
-            quantity: count,
-          }))
+          .map(([productId, count]) => {
+            const product = products.find(p => p.id === productId);
+            if (!product) return null;
+            return {
+              quantity: count,
+              product: {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                stock: product.stock,
+                categories: product.categories,
+                metadata: product.metadata
+              }
+            };
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null)
           .sort((a, b) => b.quantity - a.quantity)
           .slice(0, 5),
       };
