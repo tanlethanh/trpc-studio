@@ -3,18 +3,18 @@ import { createTRPCRouter, publicProcedure } from '@/server/api/trpc';
 
 // Complex input schemas
 const UserSchema = z.object({
-  id: z.string(),
+  id: z.string().default(() => Math.random().toString(36).substring(7)),
   name: z.string(),
   email: z.string().email(),
-  age: z.number().min(0).max(120),
+  age: z.number().min(0).max(120).default(18),
   address: z.object({
     street: z.string(),
     city: z.string(),
-    country: z.string(),
+    country: z.string().default('USA'),
     zipCode: z.string(),
   }).optional(),
-  tags: z.array(z.string()),
-  metadata: z.record(z.unknown()).optional(),
+  tags: z.array(z.string()).default([]),
+  metadata: z.record(z.unknown()).optional().default({}),
 });
 
 const PaginationSchema = z.object({
@@ -25,16 +25,16 @@ const PaginationSchema = z.object({
 });
 
 const SearchSchema = z.object({
-  query: z.string(),
+  query: z.string().default(''),
   filters: z.object({
     ageRange: z.object({
-      min: z.number().optional(),
-      max: z.number().optional(),
-    }).optional(),
-    tags: z.array(z.string()).optional(),
-    hasAddress: z.boolean().optional(),
-  }).optional(),
-  pagination: PaginationSchema.optional(),
+      min: z.number().optional().default(0),
+      max: z.number().optional().default(120),
+    }).optional().default({}),
+    tags: z.array(z.string()).optional().default([]),
+    hasAddress: z.boolean().optional().default(false),
+  }).optional().default({}),
+  pagination: PaginationSchema.optional().default({}),
 });
 
 type User = z.infer<typeof UserSchema>;

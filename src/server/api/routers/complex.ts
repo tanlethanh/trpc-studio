@@ -5,39 +5,47 @@ import type { Observer } from '@trpc/server/observable';
 
 // Complex schemas
 const ProductSchema = z.object({
-  id: z.string(),
+  id: z.string().default(() => Math.random().toString(36).substring(7)),
   name: z.string(),
   description: z.string(),
   price: z.number().positive(),
-  stock: z.number().int().min(0),
-  categories: z.array(z.string()),
-  metadata: z.record(z.unknown()).optional(),
+  stock: z.number().int().min(0).default(0),
+  categories: z.array(z.string()).default([]),
+  metadata: z.record(z.unknown()).optional().default({
+    brand: '',
+    warranty: '',
+  }),
 });
 
 const OrderSchema = z.object({
-  id: z.string(),
+  id: z.string().default(() => Math.random().toString(36).substring(7)),
   userId: z.string(),
   products: z.array(z.object({
     productId: z.string(),
-    quantity: z.number().int().positive(),
-  })),
-  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+    quantity: z.number().int().positive().default(1),
+  })).default([]),
+  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).default('pending'),
   shippingAddress: z.object({
     street: z.string(),
     city: z.string(),
-    country: z.string(),
+    country: z.string().default('USA'),
     zipCode: z.string(),
+  }).default({
+    street: '',
+    city: '',
+    country: 'USA',
+    zipCode: '',
   }),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime().default(() => new Date().toISOString()),
+  updatedAt: z.string().datetime().default(() => new Date().toISOString()),
 });
 
 export const NotificationSchema = z.object({
-  id: z.string(),
-  type: z.enum(['order_status', 'stock_alert', 'price_change']),
+  id: z.string().default(() => Math.random().toString(36).substring(7)),
+  type: z.enum(['order_status', 'stock_alert', 'price_change']).default('order_status'),
   message: z.string(),
-  read: z.boolean(),
-  createdAt: z.string().datetime(),
+  read: z.boolean().default(false),
+  createdAt: z.string().datetime().default(() => new Date().toISOString()),
 });
 
 // Example data
