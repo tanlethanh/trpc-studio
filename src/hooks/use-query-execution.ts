@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-import { AppRouter } from '@/server/api/root';
 import { type RequestLog } from '@/types/trpc';
 
 export function useQueryExecution(trpcUrl: string) {
@@ -16,19 +15,12 @@ export function useQueryExecution(trpcUrl: string) {
       setError(null);
       const startTime = performance.now();
       
-      const client = createTRPCProxyClient<AppRouter>({
+      const client = createTRPCProxyClient({
         links: [httpBatchLink({ url: trpcUrl })],
       });
 
-      if (!(procedure in client)) {
-        throw new Error(`Procedure "${procedure}" not found`);
-      }
-
-      type ProcedureQuery = {
-        query: (input: unknown) => Promise<unknown>;
-      };
-
-      const result = await (client[procedure as keyof typeof client] as ProcedureQuery).query(input);
+      // Use dynamic procedure call
+      const result = await (client as any)[procedure].query(input);
       const endTime = performance.now();
       
       setResult(result);
