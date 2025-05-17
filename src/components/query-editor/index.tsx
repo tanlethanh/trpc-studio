@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { type IntrospectionData } from '@/types/trpc';
-import { useTheme } from 'next-themes';
 import { useEffect, useRef, useState } from 'react';
 import { PlayIcon } from 'lucide-react';
 import { MonacoEditor } from '../monaco-editor';
@@ -24,13 +24,10 @@ export function QueryEditor({
   isLoading, 
   introspectionData 
 }: QueryEditorProps) {
-  const { theme } = useTheme();
   const disposableRef = useRef<any>(null);
   const [fontSize, setFontSize] = useState(14);
-  const [editor, setEditor] = useState<any>(null);
 
   const handleEditorMount = (editor: any, monaco: Monaco) => {
-    setEditor(editor);
     const disposable = setupCompletionProvider(monaco, introspectionData);
     if (disposable) {
       disposableRef.current = disposable;
@@ -63,17 +60,17 @@ export function QueryEditor({
       <CardHeader className="flex-none border-b bg-muted/30 py-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-medium">Query</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2">
             <Button 
               onClick={runQuery} 
               disabled={isLoading}
               className="flex-1"
+              size="sm"
             >
               <PlayIcon className="mr-2 h-4 w-4" />
               {isLoading ? 'Running...' : 'Run Query'}
             </Button>
             <EditorSettings
-              fontSize={fontSize}
               onZoomIn={handleZoomIn}
               onZoomOut={handleZoomOut}
               onResetZoom={handleResetZoom}

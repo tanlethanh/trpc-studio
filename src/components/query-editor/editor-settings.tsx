@@ -10,14 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Settings2Icon, ZoomInIcon, ZoomOutIcon, TypeIcon } from 'lucide-react';
 
 interface EditorSettingsProps {
-  fontSize: number;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
 }
 
 export function EditorSettings({ 
-  fontSize, 
   onZoomIn, 
   onZoomOut, 
   onResetZoom 
