@@ -12,7 +12,12 @@ import { type RequestLog } from '@/types/trpc';
 import { usePanelResize } from '@/hooks/use-panel-resize';
 
 export default function Home() {
-  const [trpcUrl, setTrpcUrl] = useState('http://localhost:3000/api/trpc');
+  const [trpcUrl, setTrpcUrl] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/api/trpc`;
+    }
+    return '/api/trpc';
+  });
   const [debouncedUrl, setDebouncedUrl] = useState(trpcUrl);
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'result' | 'history' | 'introspection'>('result');
