@@ -9,6 +9,7 @@ import { type Monaco } from '@monaco-editor/react';
 import { EditorSettings } from './editor-settings';
 import { setupCompletionProvider } from './completion-provider';
 import { useSettings } from '@/hooks/use-settings';
+import { ProcedureInputPanel } from './procedure-input-panel';
 
 interface QueryEditorProps {
   query: string;
@@ -90,6 +91,11 @@ export function QueryEditor({
           />
         </div>
       </CardContent>
+      <ProcedureInputPanel
+        introspectionData={introspectionData}
+        query={query}
+        setQuery={setQuery}
+      />
     </Card>
   );
 } 
