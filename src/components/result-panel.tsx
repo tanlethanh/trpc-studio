@@ -78,6 +78,7 @@ export function ResultPanel({
               defaultLanguage="json"
               value={error ? error : JSON.stringify(result, null, 2)}
               theme={theme === 'dark' ? 'vs-dark' : 'light'}
+              loading={null}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },

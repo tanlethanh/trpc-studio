@@ -1,7 +1,7 @@
 import { type Monaco } from '@monaco-editor/react';
 import Editor from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import * as monaco from 'monaco-editor';
 
 interface MonacoEditorProps {
@@ -9,11 +9,12 @@ interface MonacoEditorProps {
   onChange: (value: string | undefined) => void;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
   fontSize?: number;
+  options?: monaco.editor.IStandaloneEditorConstructionOptions;
 }
 
-export function MonacoEditor({ value, onChange, onMount, fontSize = 14 }: MonacoEditorProps) {
+export function MonacoEditor({ value, onChange, onMount, fontSize = 14, options }: MonacoEditorProps) {
   const { theme } = useTheme();
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
   const handleEditorWillMount = (monaco: Monaco) => {
@@ -34,6 +35,7 @@ export function MonacoEditor({ value, onChange, onMount, fontSize = 14 }: Monaco
       theme={theme === 'dark' ? 'vs-dark' : 'light'}
       onMount={handleEditorDidMount}
       beforeMount={handleEditorWillMount}
+      loading={null}
       options={{
         minimap: { enabled: false },
         fontSize,
@@ -77,6 +79,7 @@ export function MonacoEditor({ value, onChange, onMount, fontSize = 14 }: Monaco
           showTypeParameters: true,
           showSnippets: true,
         },
+        ...options
       }}
     />
   );
