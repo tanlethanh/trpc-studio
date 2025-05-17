@@ -149,55 +149,69 @@ export default function Home() {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function getDefaultInputForSchema(schema: any): any {
-  if (!schema) return {};
-  
-  const def = schema._def;
-  if (!def) return {};
+  if (!schema || typeof schema !== 'object') {
+    return null;
+  }
 
   // Handle primitive types
-  if (def.typeName === 'ZodString') {
+  if (schema.type === 'string') {
     return '';
   }
-  if (def.typeName === 'ZodNumber') {
+  if (schema.type === 'number' || schema.type === 'integer') {
     return 0;
   }
-  if (def.typeName === 'ZodBoolean') {
+  if (schema.type === 'boolean') {
     return false;
   }
-  if (def.typeName === 'ZodArray') {
+  if (schema.type === 'array') {
     return [];
   }
-  if (def.typeName === 'ZodObject' && 'shape' in def) {
-    const shape = def.shape;
+  if (schema.type === 'object') {
     const result: Record<string, any> = {};
+    if (schema.properties) {
+      for (const [key, value] of Object.entries(schema.properties)) {
+        const property = value as any;
+        const required = schema.required?.includes(key) ?? false;
+        
+        if (property.default !== undefined) {
+          result[key] = property.default;
+        } else {
+          result[key] = getDefaultInputForSchema(property);
+        }
 
-    for (const [key, value] of Object.entries(shape)) {
-      const field = value as any;
-      const fieldDef = field._def;
-      const type = fieldDef.typeName;
-
-      switch (type) {
-        case 'ZodString':
-          result[key] = '';
-          break;
-        case 'ZodNumber':
-          result[key] = 0;
-          break;
-        case 'ZodBoolean':
-          result[key] = false;
-          break;
-        case 'ZodArray':
-          result[key] = [];
-          break;
-        case 'ZodObject':
-          result[key] = getDefaultInputForSchema(field);
-          break;
-        default:
-          result[key] = null;
+        // If not required and no default value, remove the property
+        if (!required && result[key] === null) {
+          delete result[key];
+        }
       }
     }
-
     return result;
+  }
+
+  // Handle special cases
+  if (schema.enum) {
+    return schema.enum[0];
+  }
+  if (schema.oneOf) {
+    return getDefaultInputForSchema(schema.oneOf[0]);
+  }
+  if (schema.anyOf) {
+    return getDefaultInputForSchema(schema.anyOf[0]);
+  }
+  if (schema.allOf) {
+    return schema.allOf.reduce((acc: any, schema: any) => ({
+      ...acc,
+      ...getDefaultInputForSchema(schema)
+    }), {});
+  }
+  if (schema.items) {
+    return [getDefaultInputForSchema(schema.items)];
+  }
+  if (schema.additionalProperties) {
+    return {};
+  }
+  if (schema.const !== undefined) {
+    return schema.const;
   }
 
   return null;
