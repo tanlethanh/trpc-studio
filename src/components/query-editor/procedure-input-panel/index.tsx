@@ -125,34 +125,52 @@ export function ProcedureInputPanel({
           input: defaultValue 
         }, null, 2));
       } else {
+        // Function to recursively set default values for nested objects
+        function getDefaultValue(field: SchemaField): unknown {
+          if (field.defaultValue !== undefined) {
+            return field.defaultValue;
+          }
+
+          // Handle nested objects
+          if (field.type === 'object' && field.properties) {
+            const defaultObject: Record<string, unknown> = {};
+            field.properties.forEach(prop => {
+              const value = getDefaultValue(prop);
+              if (value !== undefined) {
+                defaultObject[prop.name] = value;
+              }
+            });
+            return Object.keys(defaultObject).length > 0 ? defaultObject : undefined;
+          }
+
+          // Handle arrays
+          if (field.type === 'array' && field.items) {
+            return [];
+          }
+
+          // Set type-specific defaults
+          switch (field.type) {
+            case 'string':
+              return '';
+            case 'number':
+            case 'integer':
+              return 0;
+            case 'boolean':
+              return false;
+            case 'object':
+              return {};
+            case 'array':
+              return [];
+            default:
+              return null;
+          }
+        }
+
         const defaultInput: Record<string, unknown> = {};
         parsedFields.forEach(field => {
-          if (field.defaultValue !== undefined) {
-            defaultInput[field.name] = field.defaultValue;
-          } else {
-            // Set type-specific defaults
-            switch (field.type) {
-              case 'string':
-                defaultInput[field.name] = '';
-                break;
-              case 'number':
-              case 'integer':
-                defaultInput[field.name] = 0;
-                break;
-              case 'boolean':
-                defaultInput[field.name] = false;
-                break;
-              case 'array':
-                defaultInput[field.name] = [];
-                break;
-              case 'object':
-                defaultInput[field.name] = {};
-                break;
-              default:
-                defaultInput[field.name] = null;
-            }
-          }
+          defaultInput[field.name] = getDefaultValue(field);
         });
+
         setQuery(JSON.stringify({ 
           procedure: value, 
           input: defaultInput 

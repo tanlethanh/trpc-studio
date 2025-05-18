@@ -47,6 +47,8 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
       if (field.examples) metadata.examples = field.examples as unknown[];
 
       const isAtomic = field.type === 'string' || field.type === 'number' || field.type === 'boolean';
+      const parsedFields = field.type === 'object' ? parseJsonSchema(field) : undefined;
+      
       return {
         name: key,
         type: getJsonSchemaType(field),
@@ -54,7 +56,8 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
         required: required.includes(key),
         defaultValue: field.default,
         metadata,
-        fields: field.type === 'object' ? parseJsonSchema(field) : undefined,
+        fields: parsedFields,
+        properties: parsedFields,
         isAtomic
       };
     });

@@ -41,6 +41,7 @@ interface JsonSchema {
   definitions?: Record<string, JsonSchema>;
   $ref?: string;
   $schema?: string;
+  optional?: boolean;
 }
 
 export function setupCompletionProvider(monaco: Monaco, introspectionData: IntrospectionData | null) {
@@ -82,14 +83,60 @@ export function setupCompletionProvider(monaco: Monaco, introspectionData: Intro
     if (!procedure) return;
 
     const inputSchema = procedure.inputSchema as JsonSchema;
+    
+    // Process the schema to add default values for all fields that have them
+    function processSchema(schema: JsonSchema): JsonSchema {
+      if (!schema) return schema;
+
+      // Handle object type
+      if (schema.type === 'object' && schema.properties) {
+        const processedProperties: Record<string, JsonSchema> = {};
+        let hasDefaultValues = false;
+        const defaultObject: Record<string, unknown> = {};
+        
+        for (const [key, prop] of Object.entries(schema.properties)) {
+          // Process nested schema
+          processedProperties[key] = processSchema(prop);
+          
+          // If the property has a default value, add it to the default object
+          if (prop.default !== undefined) {
+            hasDefaultValues = true;
+            defaultObject[key] = prop.default;
+          }
+        }
+
+        // If any properties have default values, add a default for the entire object
+        if (hasDefaultValues) {
+          return {
+            ...schema,
+            properties: processedProperties,
+            default: defaultObject
+          };
+        }
+
+        return {
+          ...schema,
+          properties: processedProperties
+        };
+      }
+
+      // Handle array type
+      if (schema.type === 'array' && schema.items) {
+        return {
+          ...schema,
+          items: processSchema(schema.items)
+        };
+      }
+
+      return schema;
+    }
+
+    const processedSchema = processSchema(inputSchema);
     const schema = {
       ...baseSchema,
       properties: {
         ...baseSchema.properties,
-        input: {
-          ...inputSchema,
-          additionalProperties: true
-        }
+        input: processedSchema
       }
     };
 

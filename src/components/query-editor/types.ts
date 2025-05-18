@@ -7,4 +7,6 @@ export interface SchemaField {
   metadata?: Record<string, unknown>;
   fields?: SchemaField[];
   isAtomic: boolean;
+  properties?: SchemaField[];
+  items?: SchemaField;
 } 
