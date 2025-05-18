@@ -84,7 +84,7 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 				{/* Desktop Header */}
 				<div className="hidden sm:block">
 					<div className="flex-none p-4 space-y-4">
-						<div className="flex items-center justify-between">
+						<div className="flex flex-ro items-center justify-between">
 							<div>
 								<div className="flex items-center gap-2">
 									<a
@@ -132,6 +132,16 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 								</p>
 							</div>
 							<div className="flex items-center gap-2">
+								<div className="flex items-center gap-2 text-sm">
+									<Input
+										value={trpcUrl}
+										onChange={(e) =>
+											setTrpcUrl(e.target.value)
+										}
+										placeholder="Enter tRPC URL"
+										className="font-mono text-sm w-[400px]"
+									/>
+								</div>
 								<Button
 									variant="ghost"
 									size="icon"
@@ -149,16 +159,6 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 								</Button>
 								<ThemeToggle />
 							</div>
-						</div>
-
-						<div className="flex items-center gap-2 text-sm">
-							<span className="text-muted-foreground">URL:</span>
-							<Input
-								value={trpcUrl}
-								onChange={(e) => setTrpcUrl(e.target.value)}
-								placeholder="Enter tRPC URL"
-								className="font-mono text-sm w-[400px]"
-							/>
 						</div>
 					</div>
 				</div>
