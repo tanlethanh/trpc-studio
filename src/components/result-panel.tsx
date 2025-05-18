@@ -7,7 +7,9 @@ import { type RequestLog } from '@/types/trpc';
 import { type IntrospectionData } from '@/types/trpc';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Clock, Code, CheckCircle2, XCircle } from 'lucide-react';
+import { RefreshCw, Clock, Code, CheckCircle2, XCircle, FileText } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import * as monaco from 'monaco-editor';
 
 interface Header {
   key: string;
@@ -51,9 +53,24 @@ export function ResultPanel({
 }: ResultPanelProps) {
   const { theme } = useTheme();
   const lastLog = requestLogs[requestLogs.length - 1];
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+
+  // Add resize listener to update line numbers visibility
+  useEffect(() => {
+    const handleResize = () => {
+      if (editorRef.current) {
+        editorRef.current.updateOptions({
+          lineNumbers: window.innerWidth < 768 ? 'off' : 'on'
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <Card className="w-full flex flex-col border h-full">
+    <Card className="w-full flex flex-col border h-full md:rounded-r-xl md:rounded-l-none rounded-b-xl rounded-t-none">
       <CardHeader className="flex-none border-b bg-muted/30 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 my-1">
@@ -65,7 +82,8 @@ export function ResultPanel({
                   : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              Result
+              <span className="hidden sm:inline">Result</span>
+              <CheckCircle2 className="h-4 w-4 sm:hidden" />
             </button>
             <button
               onClick={() => setActiveTab('history')}
@@ -75,7 +93,8 @@ export function ResultPanel({
                   : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              History
+              <span className="hidden sm:inline">History</span>
+              <Clock className="h-4 w-4 sm:hidden" />
             </button>
             <button
               onClick={() => setActiveTab('introspection')}
@@ -85,7 +104,8 @@ export function ResultPanel({
                   : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              Introspection
+              <span className="hidden sm:inline">Introspection</span>
+              <Code className="h-4 w-4 sm:hidden" />
             </button>
             <button
               onClick={() => setActiveTab('headers')}
@@ -95,7 +115,8 @@ export function ResultPanel({
                   : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              Headers
+              <span className="hidden sm:inline">Headers</span>
+              <FileText className="h-4 w-4 sm:hidden" />
             </button>
           </div>
           {activeTab === 'introspection' && (
@@ -149,11 +170,14 @@ export function ResultPanel({
                 value={error ? error : JSON.stringify(result, null, 2)}
                 theme={theme === 'dark' ? 'vs-dark' : 'light'}
                 loading={null}
+                onMount={(editor) => {
+                  editorRef.current = editor;
+                }}
                 options={{
                   readOnly: true,
                   minimap: { enabled: false },
                   fontSize: 13,
-                  lineNumbers: 'on',
+                  lineNumbers: typeof window !== 'undefined' && window.innerWidth < 768 ? 'off' : 'on',
                   roundedSelection: false,
                   scrollBeyondLastLine: false,
                   automaticLayout: true,

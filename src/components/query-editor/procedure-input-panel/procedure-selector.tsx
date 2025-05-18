@@ -13,7 +13,7 @@ export function ProcedureSelector({
   onProcedureChange 
 }: ProcedureSelectorProps) {
   return (
-    <div className="px-4 py-2 min-w-80">
+    <div className="flex-1 px-2 py-2">
       <Select
         value={currentProcedure || ''}
         onValueChange={onProcedureChange}

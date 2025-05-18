@@ -258,10 +258,10 @@ export function ProcedureInputPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className='flex flex-row gap-2 border-b items-center'>
+      <div className='flex flex-col sm:flex-row gap-2 border-b p-2'>
         <Button
           variant="ghost"
-          className="flex items-center justify-between p-2 hover:bg-muted/50 h-10"
+          className="flex items-center justify-between p-2 hover:bg-muted/50 h-10 w-full sm:w-auto"
         >
           <span className="text-sm font-medium">Procedure Input</span>
         </Button>

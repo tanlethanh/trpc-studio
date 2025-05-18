@@ -76,7 +76,7 @@ export function QueryEditor({
   };
 
   return (
-    <Card className="w-full flex flex-col border h-full">
+    <Card className="w-full flex flex-col border h-full md:rounded-l-xl md:rounded-r-none rounded-t-xl rounded-b-none">
       <CardHeader className="flex-none border-b bg-muted/30 py-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-medium">Query</CardTitle>
@@ -99,8 +99,8 @@ export function QueryEditor({
         </div>
       </CardHeader>
       <CardContent className="flex-1 p-0 min-h-0">
-        <PanelGroup direction="vertical">
-          <Panel defaultSize={70} minSize={30}>
+        <PanelGroup direction="vertical" className="h-full">
+          <Panel defaultSize={100} minSize={30} className="min-h-[200px]">
             <div className="h-full">
               <MonacoEditor
                 key={JSON.stringify(introspectionData)}
@@ -111,8 +111,8 @@ export function QueryEditor({
               />
             </div>
           </Panel>
-          <PanelResizeHandle className="h-1 bg-border hover:bg-primary/50 transition-colors" />
-          <Panel defaultSize={30} minSize={20}>
+          <PanelResizeHandle className="h-1 bg-border hover:bg-primary/50 transition-colors hidden md:block" />
+          <Panel defaultSize={30} minSize={20} className="min-h-[200px] hidden md:block">
             <ProcedureInputPanel
               introspectionData={introspectionData}
               query={query}

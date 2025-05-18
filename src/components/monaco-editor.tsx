@@ -44,7 +44,7 @@ export function MonacoEditor({ value, onChange, onMount, fontSize = 14, vimMode 
   const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     minimap: { enabled: false },
     fontSize,
-    lineNumbers: 'on',
+    lineNumbers: typeof window !== 'undefined' && window.innerWidth < 768 ? 'off' : 'on',
     roundedSelection: false,
     scrollBeyondLastLine: false,
     automaticLayout: true,
@@ -86,6 +86,20 @@ export function MonacoEditor({ value, onChange, onMount, fontSize = 14, vimMode 
     },
     ...options
   };
+
+  // Add resize listener to update line numbers visibility
+  useEffect(() => {
+    const handleResize = () => {
+      if (editorRef.current) {
+        editorRef.current.updateOptions({
+          lineNumbers: window.innerWidth < 768 ? 'off' : 'on'
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <Editor
