@@ -7,7 +7,10 @@ interface Header {
 	value: string;
 }
 
-export function useQueryExecution(trpcUrl: string, introspectionData: IntrospectionData | null) {
+export function useQueryExecution(
+	trpcUrl: string,
+	introspectionData: IntrospectionData | null,
+) {
 	const [result, setResult] = useState<unknown>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [requestLogs, setRequestLogs] = useState<RequestLog[]>([]);
@@ -33,7 +36,10 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
 
 	// Save headers to localStorage whenever they change
 	useEffect(() => {
-		localStorage.setItem('trpc-playground-headers', JSON.stringify(headers));
+		localStorage.setItem(
+			'trpc-playground-headers',
+			JSON.stringify(headers),
+		);
 	}, [headers]);
 
 	const executeQuery = async (procedure: string, input: unknown) => {
@@ -63,7 +69,9 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
 			});
 
 			// Get the procedure type from introspection data
-			const procedureInfo = introspectionData?.procedures.find(p => p.path === procedure);
+			const procedureInfo = introspectionData?.procedures.find(
+				(p) => p.path === procedure,
+			);
 			const isMutation = procedureInfo?.type === 'mutation';
 
 			// Access the procedure first, then call the appropriate method
@@ -75,7 +83,7 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
 			const endTime = performance.now();
 
 			setResult(result);
-			setRequestLogs(prev =>
+			setRequestLogs((prev) =>
 				[
 					{
 						timestamp: Date.now(),
@@ -89,9 +97,10 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
 				].slice(0, 10),
 			);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+			const errorMessage =
+				err instanceof Error ? err.message : 'An error occurred';
 			setError(errorMessage);
-			setRequestLogs(prev =>
+			setRequestLogs((prev) =>
 				[
 					{
 						timestamp: Date.now(),
@@ -116,11 +125,14 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
 				throw new Error('Invalid query format');
 			}
 			if (!queryObj.procedure || typeof queryObj.procedure !== 'string') {
-				throw new Error('Procedure name is required and must be a string');
+				throw new Error(
+					'Procedure name is required and must be a string',
+				);
 			}
 			await executeQuery(queryObj.procedure, queryObj.input);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Failed to parse query';
+			const errorMessage =
+				err instanceof Error ? err.message : 'Failed to parse query';
 			setError(errorMessage);
 		}
 	};
@@ -132,14 +144,17 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
 			}
 			await executeQuery(log.procedure, log.input);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Failed to replay query';
+			const errorMessage =
+				err instanceof Error ? err.message : 'Failed to replay query';
 			setError(errorMessage);
 		}
 	};
 
 	const toggleLog = (index: number) => {
-		setExpandedLogs(prev =>
-			prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index],
+		setExpandedLogs((prev) =>
+			prev.includes(index)
+				? prev.filter((i) => i !== index)
+				: [...prev, index],
 		);
 	};
 

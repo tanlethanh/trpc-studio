@@ -44,12 +44,18 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 									</g>
 									<defs>
 										<clipPath id="clip0_43_39">
-											<rect width="512" height="512" fill="white" />
+											<rect
+												width="512"
+												height="512"
+												fill="white"
+											/>
 										</clipPath>
 									</defs>
 								</svg>
 							</a>
-							<h1 className="text-xl font-medium text-foreground">tRPC Studio</h1>
+							<h1 className="text-xl font-medium text-foreground">
+								tRPC Studio
+							</h1>
 						</div>
 						<div className="flex items-center gap-2">
 							<Button variant="ghost" size="icon" asChild>
@@ -69,7 +75,7 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 							type="url"
 							placeholder="Enter tRPC URL"
 							value={trpcUrl}
-							onChange={e => setTrpcUrl(e.target.value)}
+							onChange={(e) => setTrpcUrl(e.target.value)}
 							className="w-full font-mono text-sm"
 						/>
 					</div>
@@ -108,7 +114,11 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 											</g>
 											<defs>
 												<clipPath id="clip0_43_39">
-													<rect width="512" height="512" fill="white" />
+													<rect
+														width="512"
+														height="512"
+														fill="white"
+													/>
 												</clipPath>
 											</defs>
 										</svg>
@@ -122,7 +132,12 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 								</p>
 							</div>
 							<div className="flex items-center gap-2">
-								<Button variant="ghost" size="icon" asChild className="h-9 w-9">
+								<Button
+									variant="ghost"
+									size="icon"
+									asChild
+									className="h-9 w-9"
+								>
 									<a
 										href="https://github.com/trpc/trpc"
 										target="_blank"
@@ -140,7 +155,7 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 							<span className="text-muted-foreground">URL:</span>
 							<Input
 								value={trpcUrl}
-								onChange={e => setTrpcUrl(e.target.value)}
+								onChange={(e) => setTrpcUrl(e.target.value)}
 								placeholder="Enter tRPC URL"
 								className="font-mono text-sm w-[400px]"
 							/>

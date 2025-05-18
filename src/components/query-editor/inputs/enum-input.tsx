@@ -21,17 +21,26 @@ export function EnumInput({ field, value, onChange }: EnumInputProps) {
 		<div className="flex flex-row gap-2 items-center">
 			<Label htmlFor={field.name} className="text-sm font-medium w-1/4">
 				{field.name}
-				{!field.required && <span className="text-muted-foreground ml-1">(optional)</span>}
+				{!field.required && (
+					<span className="text-muted-foreground ml-1">
+						(optional)
+					</span>
+				)}
 			</Label>
 			{field.description && (
-				<p className="text-sm text-muted-foreground">{field.description}</p>
+				<p className="text-sm text-muted-foreground">
+					{field.description}
+				</p>
 			)}
 			<Select value={value} onValueChange={onChange}>
-				<SelectTrigger id={field.name} className="font-mono text-sm h-9">
+				<SelectTrigger
+					id={field.name}
+					className="font-mono text-sm h-9"
+				>
 					<SelectValue placeholder={`Select ${field.name}`} />
 				</SelectTrigger>
 				<SelectContent>
-					{options.map(option => (
+					{options.map((option) => (
 						<SelectItem key={option} value={option}>
 							{option}
 						</SelectItem>

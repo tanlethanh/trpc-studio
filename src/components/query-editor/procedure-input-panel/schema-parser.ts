@@ -14,11 +14,14 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
 		const metadata: Record<string, unknown> = {};
 
 		if (schemaObj.format) metadata.format = schemaObj.format as string;
-		if (schemaObj.minimum !== undefined) metadata.min = schemaObj.minimum as number;
-		if (schemaObj.maximum !== undefined) metadata.max = schemaObj.maximum as number;
+		if (schemaObj.minimum !== undefined)
+			metadata.min = schemaObj.minimum as number;
+		if (schemaObj.maximum !== undefined)
+			metadata.max = schemaObj.maximum as number;
 		if (schemaObj.pattern) metadata.pattern = schemaObj.pattern as string;
 		if (schemaObj.enum) metadata.enum = schemaObj.enum as unknown[];
-		if (schemaObj.examples) metadata.examples = schemaObj.examples as unknown[];
+		if (schemaObj.examples)
+			metadata.examples = schemaObj.examples as unknown[];
 
 		return [
 			{
@@ -36,7 +39,10 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
 	// Handle object types
 	if (schemaObj.type === 'object') {
 		// If it's an empty object or has additionalProperties, treat it as atomic
-		if (!schemaObj.properties || (schemaObj.additionalProperties && !schemaObj.properties)) {
+		if (
+			!schemaObj.properties ||
+			(schemaObj.additionalProperties && !schemaObj.properties)
+		) {
 			return [
 				{
 					name: 'value',
@@ -57,8 +63,10 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
 			const field = value as Record<string, unknown>;
 			const metadata: Record<string, unknown> = {};
 			if (field.format) metadata.format = field.format as string;
-			if (field.minimum !== undefined) metadata.min = field.minimum as number;
-			if (field.maximum !== undefined) metadata.max = field.maximum as number;
+			if (field.minimum !== undefined)
+				metadata.min = field.minimum as number;
+			if (field.maximum !== undefined)
+				metadata.max = field.maximum as number;
 			if (field.pattern) metadata.pattern = field.pattern as string;
 			if (field.enum) metadata.enum = field.enum as unknown[];
 			if (field.examples) metadata.examples = field.examples as unknown[];
@@ -68,10 +76,13 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
 					field.type === 'number' ||
 					field.type === 'boolean' ||
 					field.type === 'array' ||
-					(field.type === 'object' && (!field.properties || field.additionalProperties)),
+					(field.type === 'object' &&
+						(!field.properties || field.additionalProperties)),
 			);
 			const parsedFields =
-				field.type === 'object' && field.properties ? parseJsonSchema(field) : undefined;
+				field.type === 'object' && field.properties
+					? parseJsonSchema(field)
+					: undefined;
 
 			return {
 				name: key,
@@ -91,9 +102,12 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
 	if (schemaObj.type === 'array' && schemaObj.items) {
 		const items = schemaObj.items as Record<string, unknown>;
 		const metadata: Record<string, unknown> = {};
-		if (schemaObj.minItems !== undefined) metadata.minItems = schemaObj.minItems as number;
-		if (schemaObj.maxItems !== undefined) metadata.maxItems = schemaObj.maxItems as number;
-		if (schemaObj.uniqueItems) metadata.uniqueItems = schemaObj.uniqueItems as boolean;
+		if (schemaObj.minItems !== undefined)
+			metadata.minItems = schemaObj.minItems as number;
+		if (schemaObj.maxItems !== undefined)
+			metadata.maxItems = schemaObj.maxItems as number;
+		if (schemaObj.uniqueItems)
+			metadata.uniqueItems = schemaObj.uniqueItems as boolean;
 
 		return [
 			{
@@ -103,7 +117,10 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
 				required: true,
 				defaultValue: schemaObj.default ?? [],
 				metadata,
-				fields: items.type === 'object' ? parseJsonSchema(items) : undefined,
+				fields:
+					items.type === 'object'
+						? parseJsonSchema(items)
+						: undefined,
 				isAtomic: true,
 			},
 		];
@@ -126,7 +143,7 @@ export function getJsonSchemaType(schema: Record<string, unknown>): string {
 	}
 
 	if (schema.enum) {
-		return `enum<${(schema.enum as unknown[]).map(v => JSON.stringify(v)).join(' | ')}>`;
+		return `enum<${(schema.enum as unknown[]).map((v) => JSON.stringify(v)).join(' | ')}>`;
 	}
 
 	if (schema.format) {

@@ -1,5 +1,7 @@
+import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import { includeIgnoreFile } from '@eslint/compat';
 import pluginImport from 'eslint-plugin-import';
 import pluginPrettier from 'eslint-plugin-prettier';
 import pluginReact from 'eslint-plugin-react';
@@ -7,7 +9,10 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import pluginJest from 'eslint-plugin-jest';
 
+const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url));
+
 export default defineConfig([
+	includeIgnoreFile(gitignorePath),
 	tseslint.configs.recommended,
 	pluginReact.configs.flat.recommended,
 	{
@@ -27,7 +32,10 @@ export default defineConfig([
 			'react/react-in-jsx-scope': 'off',
 			'react/no-unescaped-entities': 'off',
 			'no-empty': 'off',
-			'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+			'import/consistent-type-specifier-style': [
+				'error',
+				'prefer-top-level',
+			],
 			'import/order': [
 				'error',
 				{

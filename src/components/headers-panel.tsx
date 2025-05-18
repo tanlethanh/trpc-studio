@@ -19,30 +19,44 @@ const PROTECTED_HEADERS = ['authorization', 'content-type'];
 export function HeadersPanel({ headers, onChange }: HeadersPanelProps) {
 	const [localHeaders, setLocalHeaders] = useState<Header[]>(() => {
 		// Ensure required headers exist
-		const hasAuth = headers.some(h => h.key.toLowerCase() === 'authorization');
-		const hasContentType = headers.some(h => h.key.toLowerCase() === 'content-type');
+		const hasAuth = headers.some(
+			(h) => h.key.toLowerCase() === 'authorization',
+		);
+		const hasContentType = headers.some(
+			(h) => h.key.toLowerCase() === 'content-type',
+		);
 		const newHeaders = [...headers];
 
 		if (!hasAuth) {
 			newHeaders.unshift({ key: 'Authorization', value: '' });
 		}
 		if (!hasContentType) {
-			newHeaders.unshift({ key: 'Content-Type', value: 'application/json' });
+			newHeaders.unshift({
+				key: 'Content-Type',
+				value: 'application/json',
+			});
 		}
 		return newHeaders;
 	});
 
 	useEffect(() => {
 		// Ensure required headers exist when headers prop changes
-		const hasAuth = headers.some(h => h.key.toLowerCase() === 'authorization');
-		const hasContentType = headers.some(h => h.key.toLowerCase() === 'content-type');
+		const hasAuth = headers.some(
+			(h) => h.key.toLowerCase() === 'authorization',
+		);
+		const hasContentType = headers.some(
+			(h) => h.key.toLowerCase() === 'content-type',
+		);
 		const newHeaders = [...headers];
 
 		if (!hasAuth) {
 			newHeaders.unshift({ key: 'Authorization', value: '' });
 		}
 		if (!hasContentType) {
-			newHeaders.unshift({ key: 'Content-Type', value: 'application/json' });
+			newHeaders.unshift({
+				key: 'Content-Type',
+				value: 'application/json',
+			});
 		}
 		setLocalHeaders(newHeaders);
 	}, [headers]);
@@ -64,11 +78,18 @@ export function HeadersPanel({ headers, onChange }: HeadersPanelProps) {
 		onChange(newHeaders);
 	};
 
-	const handleHeaderChange = (index: number, field: 'key' | 'value', value: string) => {
+	const handleHeaderChange = (
+		index: number,
+		field: 'key' | 'value',
+		value: string,
+	) => {
 		const newHeaders = localHeaders.map((header, i) => {
 			if (i === index) {
 				// Prevent changing protected header keys
-				if (field === 'key' && PROTECTED_HEADERS.includes(header.key.toLowerCase())) {
+				if (
+					field === 'key' &&
+					PROTECTED_HEADERS.includes(header.key.toLowerCase())
+				) {
 					return header;
 				}
 				return { ...header, [field]: value };
@@ -79,7 +100,8 @@ export function HeadersPanel({ headers, onChange }: HeadersPanelProps) {
 		onChange(newHeaders);
 	};
 
-	const isProtectedHeader = (key: string) => PROTECTED_HEADERS.includes(key.toLowerCase());
+	const isProtectedHeader = (key: string) =>
+		PROTECTED_HEADERS.includes(key.toLowerCase());
 
 	return (
 		<Card className="h-full">
@@ -99,26 +121,43 @@ export function HeadersPanel({ headers, onChange }: HeadersPanelProps) {
 					</div>
 					<div className="flex flex-col gap-2">
 						{localHeaders.map((header, index) => (
-							<div key={index} className="flex gap-2 items-center">
+							<div
+								key={index}
+								className="flex gap-2 items-center"
+							>
 								<Input
 									placeholder="Header name"
 									value={header.key}
-									onChange={e => handleHeaderChange(index, 'key', e.target.value)}
+									onChange={(e) =>
+										handleHeaderChange(
+											index,
+											'key',
+											e.target.value,
+										)
+									}
 									className="flex-1"
 									disabled={isProtectedHeader(header.key)}
 								/>
 								<Input
 									placeholder={
-										header.key.toLowerCase() === 'authorization'
+										header.key.toLowerCase() ===
+										'authorization'
 											? 'Bearer your-token-here'
 											: 'Header value'
 									}
 									value={header.value}
-									onChange={e =>
-										handleHeaderChange(index, 'value', e.target.value)
+									onChange={(e) =>
+										handleHeaderChange(
+											index,
+											'value',
+											e.target.value,
+										)
 									}
 									className="flex-1"
-									disabled={header.key.toLowerCase() === 'content-type'}
+									disabled={
+										header.key.toLowerCase() ===
+										'content-type'
+									}
 								/>
 								<Button
 									variant="ghost"

@@ -7,17 +7,21 @@ interface InputFieldsProps {
 	onInputChange: (key: string, value: string) => void;
 }
 
-export function InputFields({ fields, inputValues, onInputChange }: InputFieldsProps) {
+export function InputFields({
+	fields,
+	inputValues,
+	onInputChange,
+}: InputFieldsProps) {
 	if (fields.length === 0) return null;
 
 	return (
 		<div className="space-y-1 p-4">
-			{fields.map(field => (
+			{fields.map((field) => (
 				<SchemaInput
 					key={field.name}
 					field={field}
 					value={inputValues[field.name] || ''}
-					onChange={value => onInputChange(field.name, value)}
+					onChange={(value) => onInputChange(field.name, value)}
 				/>
 			))}
 		</div>

@@ -19,9 +19,9 @@ export default function Home() {
 	});
 	const [debouncedUrl, setDebouncedUrl] = useState(trpcUrl);
 	const [query, setQuery] = useState('');
-	const [activeTab, setActiveTab] = useState<'result' | 'history' | 'introspection' | 'headers'>(
-		'result',
-	);
+	const [activeTab, setActiveTab] = useState<
+		'result' | 'history' | 'introspection' | 'headers'
+	>('result');
 	const { isMobile } = useMedia();
 
 	useEffect(() => {

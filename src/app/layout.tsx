@@ -14,7 +14,10 @@ export const metadata: Metadata = {
 	title: 'tRPC Studio',
 	description: 'A playground for testing tRPC endpoints',
 	icons: {
-		icon: [{ url: '/trpc-icon.svg', type: 'image/svg+xml' }, { url: '/favicon.ico' }],
+		icon: [
+			{ url: '/trpc-icon.svg', type: 'image/svg+xml' },
+			{ url: '/favicon.ico' },
+		],
 		other: [
 			{
 				rel: 'mask-icon',

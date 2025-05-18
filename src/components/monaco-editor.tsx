@@ -7,7 +7,10 @@ import * as monaco from 'monaco-editor';
 interface MonacoEditorProps {
 	value: string;
 	onChange: (value: string | undefined) => void;
-	onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
+	onMount?: (
+		editor: monaco.editor.IStandaloneCodeEditor,
+		monaco: Monaco,
+	) => void;
 	fontSize?: number;
 	vimMode?: boolean;
 	options?: monaco.editor.IStandaloneEditorConstructionOptions;
@@ -29,7 +32,10 @@ export function MonacoEditor({
 		monacoRef.current = monaco;
 	};
 
-	const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
+	const handleEditorDidMount = (
+		editor: monaco.editor.IStandaloneCodeEditor,
+		monaco: Monaco,
+	) => {
 		editorRef.current = editor;
 		onMount?.(editor, monaco);
 	};
@@ -51,7 +57,10 @@ export function MonacoEditor({
 	const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 		minimap: { enabled: false },
 		fontSize,
-		lineNumbers: typeof window !== 'undefined' && window.innerWidth < 768 ? 'off' : 'on',
+		lineNumbers:
+			typeof window !== 'undefined' && window.innerWidth < 768
+				? 'off'
+				: 'on',
 		roundedSelection: false,
 		scrollBeyondLastLine: false,
 		automaticLayout: true,

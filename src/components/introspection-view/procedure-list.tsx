@@ -6,7 +6,9 @@ import type { IntrospectionData } from '@/types/trpc';
 interface ProcedureListProps {
 	data: IntrospectionData;
 	selectedType: 'query' | 'mutation' | 'subscription' | 'all';
-	setSelectedType: (type: 'query' | 'mutation' | 'subscription' | 'all') => void;
+	setSelectedType: (
+		type: 'query' | 'mutation' | 'subscription' | 'all',
+	) => void;
 	onProcedureClick: (procedure: IntrospectionData['procedures'][0]) => void;
 }
 
@@ -16,7 +18,7 @@ export function ProcedureList({
 	setSelectedType,
 	onProcedureClick,
 }: ProcedureListProps) {
-	const filteredProcedures = data.procedures.filter(p =>
+	const filteredProcedures = data.procedures.filter((p) =>
 		selectedType === 'all' ? true : p.type === selectedType,
 	);
 
@@ -41,7 +43,9 @@ export function ProcedureList({
 						Queries
 					</Button>
 					<Button
-						variant={selectedType === 'mutation' ? 'default' : 'ghost'}
+						variant={
+							selectedType === 'mutation' ? 'default' : 'ghost'
+						}
 						size="sm"
 						className="h-7"
 						onClick={() => setSelectedType('mutation')}
@@ -49,7 +53,11 @@ export function ProcedureList({
 						Mutations
 					</Button>
 					<Button
-						variant={selectedType === 'subscription' ? 'default' : 'ghost'}
+						variant={
+							selectedType === 'subscription'
+								? 'default'
+								: 'ghost'
+						}
 						size="sm"
 						className="h-7"
 						onClick={() => setSelectedType('subscription')}
@@ -68,7 +76,9 @@ export function ProcedureList({
 						>
 							<div className="flex items-center justify-between">
 								<div className="flex items-center gap-2">
-									<span className="font-medium">{procedure.path}</span>
+									<span className="font-medium">
+										{procedure.path}
+									</span>
 									<span
 										className={`px-2 py-0.5 rounded text-xs ${
 											procedure.type === 'query'

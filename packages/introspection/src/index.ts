@@ -19,7 +19,10 @@ export interface RouterInfo {
 }
 
 // Helper to recursively collect procedures from a router
-function collectProcedures(router: AnyTRPCRouter, parentPath: string[] = []): ProcedureInfo[] {
+function collectProcedures(
+	router: AnyTRPCRouter,
+	parentPath: string[] = [],
+): ProcedureInfo[] {
 	const procedures: ProcedureInfo[] = [];
 
 	// Collect procedures
@@ -31,9 +34,13 @@ function collectProcedures(router: AnyTRPCRouter, parentPath: string[] = []): Pr
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const unsafeProc = proc as any;
 		const inputSchema =
-			typeof unsafeProc._def.inputs !== 'undefined' ? unsafeProc._def.inputs[0] : null;
+			typeof unsafeProc._def.inputs !== 'undefined'
+				? unsafeProc._def.inputs[0]
+				: null;
 		const outputSchema =
-			typeof unsafeProc._def.output !== 'undefined' ? unsafeProc._def.output : null;
+			typeof unsafeProc._def.output !== 'undefined'
+				? unsafeProc._def.output
+				: null;
 		procedures.push({
 			path: [...parentPath, key].join('.'),
 			type: proc._def.type,

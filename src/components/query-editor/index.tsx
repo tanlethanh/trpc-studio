@@ -47,7 +47,10 @@ export function QueryEditor({
 			// Dispose old provider
 			disposableRef.current.dispose();
 			// Create new provider with updated schema
-			const disposable = setupCompletionProvider(monacoRef.current, introspectionData);
+			const disposable = setupCompletionProvider(
+				monacoRef.current,
+				introspectionData,
+			);
 			if (disposable) {
 				disposableRef.current = disposable;
 			}
@@ -64,11 +67,15 @@ export function QueryEditor({
 	}, []);
 
 	const handleZoomIn = () => {
-		updateEditorSettings({ fontSize: Math.min(settings.editor.fontSize + 2, 24) });
+		updateEditorSettings({
+			fontSize: Math.min(settings.editor.fontSize + 2, 24),
+		});
 	};
 
 	const handleZoomOut = () => {
-		updateEditorSettings({ fontSize: Math.max(settings.editor.fontSize - 2, 8) });
+		updateEditorSettings({
+			fontSize: Math.max(settings.editor.fontSize - 2, 8),
+		});
 	};
 
 	const handleResetZoom = () => {
@@ -79,7 +86,9 @@ export function QueryEditor({
 		<Card className="w-full flex flex-col border h-full md:rounded-l-xl md:rounded-r-none rounded-t-xl rounded-b-none">
 			<CardHeader className="flex-none border-b bg-muted/30 py-2">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-base font-medium">Query</CardTitle>
+					<CardTitle className="text-base font-medium">
+						Query
+					</CardTitle>
 					<div className="flex gap-2">
 						<Button
 							onClick={runQuery}
@@ -100,19 +109,27 @@ export function QueryEditor({
 			</CardHeader>
 			<CardContent className="flex-1 p-0 min-h-0">
 				<PanelGroup direction="vertical" className="h-full">
-					<Panel defaultSize={100} minSize={30} className="min-h-[200px]">
+					<Panel
+						defaultSize={100}
+						minSize={30}
+						className="min-h-[200px]"
+					>
 						<div className="h-full">
 							<MonacoEditor
 								key={JSON.stringify(introspectionData)}
 								value={query}
-								onChange={value => setQuery(value || '')}
+								onChange={(value) => setQuery(value || '')}
 								onMount={handleEditorMount}
 								fontSize={settings.editor.fontSize}
 							/>
 						</div>
 					</Panel>
 					<PanelResizeHandle className="h-1 bg-border hover:bg-primary/50 transition-colors hidden md:block" />
-					<Panel defaultSize={30} minSize={20} className="min-h-[200px] hidden md:block">
+					<Panel
+						defaultSize={30}
+						minSize={20}
+						className="min-h-[200px] hidden md:block"
+					>
 						<ProcedureInputPanel
 							introspectionData={introspectionData}
 							query={query}

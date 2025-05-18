@@ -60,10 +60,15 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 	return (
 		<div className="space-y-2">
 			<div className="flex items-center gap-2">
-				<Label htmlFor={field.name} className="text-sm font-medium whitespace-nowrap">
+				<Label
+					htmlFor={field.name}
+					className="text-sm font-medium whitespace-nowrap"
+				>
 					{field.name} ({field.type})
 					{!field.required && (
-						<span className="text-muted-foreground ml-1">(optional)</span>
+						<span className="text-muted-foreground ml-1">
+							(optional)
+						</span>
 					)}
 				</Label>
 				<div className="flex flex-wrap gap-2">
@@ -73,25 +78,37 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 								{isEnum ? (
 									<Select
 										value={String(item)}
-										onValueChange={value => handleValueChange(index, value)}
+										onValueChange={(value) =>
+											handleValueChange(index, value)
+										}
 									>
 										<SelectTrigger className="h-8">
 											<SelectValue placeholder="Select value" />
 										</SelectTrigger>
 										<SelectContent>
-											{(items?.metadata?.enum as string[] | undefined)?.map(
-												option => (
-													<SelectItem key={option} value={option}>
-														{option}
-													</SelectItem>
-												),
-											)}
+											{(
+												items?.metadata?.enum as
+													| string[]
+													| undefined
+											)?.map((option) => (
+												<SelectItem
+													key={option}
+													value={option}
+												>
+													{option}
+												</SelectItem>
+											))}
 										</SelectContent>
 									</Select>
 								) : (
 									<Input
 										value={String(item)}
-										onChange={e => handleValueChange(index, e.target.value)}
+										onChange={(e) =>
+											handleValueChange(
+												index,
+												e.target.value,
+											)
+										}
 										placeholder="Enter value"
 										className="font-mono text-sm h-8"
 									/>
@@ -101,7 +118,10 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 								variant="ghost"
 								size="sm"
 								onClick={() => handleRemove(index)}
-								disabled={minItems !== undefined && values.length <= minItems}
+								disabled={
+									minItems !== undefined &&
+									values.length <= minItems
+								}
 								className="h-8 w-8 p-0"
 							>
 								×
@@ -114,7 +134,9 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 						variant="outline"
 						size="sm"
 						onClick={handleAdd}
-						disabled={maxItems !== undefined && values.length >= maxItems}
+						disabled={
+							maxItems !== undefined && values.length >= maxItems
+						}
 					>
 						+
 					</Button>
@@ -122,14 +144,18 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 						variant="outline"
 						size="sm"
 						onClick={() => handleRemove(values.length - 1)}
-						disabled={minItems !== undefined && values.length <= minItems}
+						disabled={
+							minItems !== undefined && values.length <= minItems
+						}
 					>
 						-
 					</Button>
 				</div>
 			</div>
 			{field.description && (
-				<p className="text-sm text-muted-foreground">{field.description}</p>
+				<p className="text-sm text-muted-foreground">
+					{field.description}
+				</p>
 			)}
 		</div>
 	);

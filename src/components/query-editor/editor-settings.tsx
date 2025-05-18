@@ -15,7 +15,11 @@ interface EditorSettingsProps {
 	onResetZoom: () => void;
 }
 
-export function EditorSettings({ onZoomIn, onZoomOut, onResetZoom }: EditorSettingsProps) {
+export function EditorSettings({
+	onZoomIn,
+	onZoomOut,
+	onResetZoom,
+}: EditorSettingsProps) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -26,7 +30,9 @@ export function EditorSettings({ onZoomIn, onZoomOut, onResetZoom }: EditorSetti
 			<DropdownMenuContent align="end">
 				<DropdownMenuLabel>Editor Settings</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuLabel className="pl-2">Font Size</DropdownMenuLabel>
+				<DropdownMenuLabel className="pl-2">
+					Font Size
+				</DropdownMenuLabel>
 				<DropdownMenuCheckboxItem
 					checked={false}
 					onCheckedChange={onZoomIn}
@@ -52,7 +58,9 @@ export function EditorSettings({ onZoomIn, onZoomOut, onResetZoom }: EditorSetti
 					Reset Zoom
 				</DropdownMenuCheckboxItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuLabel className="pl-2">Editor Mode</DropdownMenuLabel>
+				<DropdownMenuLabel className="pl-2">
+					Editor Mode
+				</DropdownMenuLabel>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

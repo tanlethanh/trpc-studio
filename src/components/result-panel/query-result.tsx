@@ -26,7 +26,9 @@ export function QueryResult({ lastLog, error, result }: Props) {
 							) : (
 								<CheckCircle2 className="h-4 w-4 text-green-500" />
 							)}
-							<span className="font-medium">{error ? 'Error' : 'Success'}</span>
+							<span className="font-medium">
+								{error ? 'Error' : 'Success'}
+							</span>
 						</div>
 						<div className="flex items-center gap-1 text-muted-foreground">
 							<Clock className="h-4 w-4" />
@@ -49,7 +51,7 @@ export function QueryResult({ lastLog, error, result }: Props) {
 					value={error ? error : JSON.stringify(result, null, 2)}
 					theme={theme === 'dark' ? 'vs-dark' : 'light'}
 					loading={null}
-					onMount={editor => {
+					onMount={(editor) => {
 						editorRef.current = editor;
 					}}
 					options={{
@@ -57,7 +59,10 @@ export function QueryResult({ lastLog, error, result }: Props) {
 						minimap: { enabled: false },
 						fontSize: 13,
 						lineNumbers:
-							typeof window !== 'undefined' && window.innerWidth < 768 ? 'off' : 'on',
+							typeof window !== 'undefined' &&
+							window.innerWidth < 768
+								? 'off'
+								: 'on',
 						roundedSelection: false,
 						scrollBeyondLastLine: false,
 						automaticLayout: true,

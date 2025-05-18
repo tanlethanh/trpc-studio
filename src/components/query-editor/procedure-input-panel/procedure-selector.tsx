@@ -20,12 +20,15 @@ export function ProcedureSelector({
 }: ProcedureSelectorProps) {
 	return (
 		<div className="flex-1 px-2 py-2">
-			<Select value={currentProcedure || ''} onValueChange={onProcedureChange}>
+			<Select
+				value={currentProcedure || ''}
+				onValueChange={onProcedureChange}
+			>
 				<SelectTrigger className="w-full h-9">
 					<SelectValue placeholder="Select a procedure" />
 				</SelectTrigger>
 				<SelectContent>
-					{introspectionData?.procedures.map(procedure => (
+					{introspectionData?.procedures.map((procedure) => (
 						<SelectItem key={procedure.path} value={procedure.path}>
 							{procedure.path}
 						</SelectItem>

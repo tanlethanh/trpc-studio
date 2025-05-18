@@ -18,7 +18,9 @@ interface Header {
 
 interface ResultPanelProps {
 	activeTab: 'result' | 'history' | 'introspection' | 'headers';
-	setActiveTab: (tab: 'result' | 'history' | 'introspection' | 'headers') => void;
+	setActiveTab: (
+		tab: 'result' | 'history' | 'introspection' | 'headers',
+	) => void;
 	result: unknown;
 	error: string | null;
 	requestLogs: RequestLog[];
@@ -91,7 +93,11 @@ export function ResultPanel({
 
 			<CardContent className="flex-1 p-0 min-h-0 overflow-auto">
 				{activeTab === 'result' ? (
-					<QueryResult lastLog={lastLog} error={error} result={result} />
+					<QueryResult
+						lastLog={lastLog}
+						error={error}
+						result={result}
+					/>
 				) : activeTab === 'history' ? (
 					<RequestHistory
 						logs={requestLogs}
@@ -101,7 +107,10 @@ export function ResultPanel({
 						isLoading={isLoading}
 					/>
 				) : activeTab === 'headers' ? (
-					<HeadersPanel headers={headers} onChange={onHeadersChange} />
+					<HeadersPanel
+						headers={headers}
+						onChange={onHeadersChange}
+					/>
 				) : (
 					<IntrospectionView
 						data={introspectionData}

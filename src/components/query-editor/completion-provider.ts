@@ -59,7 +59,7 @@ export function setupCompletionProvider(
 		properties: {
 			procedure: {
 				type: 'string',
-				enum: introspectionData.procedures.map(p => p.path),
+				enum: introspectionData.procedures.map((p) => p.path),
 				description: 'The tRPC procedure to call',
 			},
 			input: {
@@ -82,7 +82,9 @@ export function setupCompletionProvider(
 		if (!procedureMatch) return;
 
 		const procedurePath = procedureMatch[1];
-		const procedure = introspectionData?.procedures.find(p => p.path === procedurePath);
+		const procedure = introspectionData?.procedures.find(
+			(p) => p.path === procedurePath,
+		);
 		if (!procedure) return;
 
 		const inputSchema = procedure.inputSchema as JsonSchema;
@@ -194,28 +196,30 @@ export function setupCompletionProvider(
 					endColumn: word?.endColumn ?? position.column,
 				};
 
-				const suggestions = introspectionData.procedures.map(procedure => ({
-					label: procedure.path,
-					kind: monaco.languages.CompletionItemKind.Function,
-					insertText: `"${procedure.path}"`,
-					detail: `tRPC ${procedure.type}: ${procedure.path}`,
-					documentation: {
-						value: [
-							`**${procedure.type.toUpperCase()} Procedure**`,
-							'',
-							'**Input Schema:**',
-							'```json',
-							JSON.stringify(procedure.inputSchema, null, 2),
-							'```',
-							'',
-							'**Output Schema:**',
-							'```json',
-							JSON.stringify(procedure.outputSchema, null, 2),
-							'```',
-						].join('\n'),
-					},
-					range,
-				}));
+				const suggestions = introspectionData.procedures.map(
+					(procedure) => ({
+						label: procedure.path,
+						kind: monaco.languages.CompletionItemKind.Function,
+						insertText: `"${procedure.path}"`,
+						detail: `tRPC ${procedure.type}: ${procedure.path}`,
+						documentation: {
+							value: [
+								`**${procedure.type.toUpperCase()} Procedure**`,
+								'',
+								'**Input Schema:**',
+								'```json',
+								JSON.stringify(procedure.inputSchema, null, 2),
+								'```',
+								'',
+								'**Output Schema:**',
+								'```json',
+								JSON.stringify(procedure.outputSchema, null, 2),
+								'```',
+							].join('\n'),
+						},
+						range,
+					}),
+				);
 
 				return { suggestions };
 			}

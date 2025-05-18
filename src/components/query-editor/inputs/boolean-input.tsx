@@ -15,17 +15,23 @@ export function BooleanInput({ field, value, onChange }: BooleanInputProps) {
 				<Label htmlFor={field.name} className="text-sm font-medium">
 					{field.name} ({field.type})
 					{!field.required && (
-						<span className="text-muted-foreground ml-1">(optional)</span>
+						<span className="text-muted-foreground ml-1">
+							(optional)
+						</span>
 					)}
 				</Label>
 				{field.description && (
-					<p className="text-sm text-muted-foreground">{field.description}</p>
+					<p className="text-sm text-muted-foreground">
+						{field.description}
+					</p>
 				)}
 			</div>
 			<Switch
 				id={field.name}
 				checked={value === 'true'}
-				onCheckedChange={(checked: boolean) => onChange(String(checked))}
+				onCheckedChange={(checked: boolean) =>
+					onChange(String(checked))
+				}
 			/>
 		</div>
 	);

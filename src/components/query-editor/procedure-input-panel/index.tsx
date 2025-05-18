@@ -18,7 +18,9 @@ export function ProcedureInputPanel({
 	setQuery,
 }: ProcedureInputPanelProps) {
 	const [inputValues, setInputValues] = useState<Record<string, string>>({});
-	const [currentProcedure, setCurrentProcedure] = useState<string | null>(null);
+	const [currentProcedure, setCurrentProcedure] = useState<string | null>(
+		null,
+	);
 	const [isAtomicType, setIsAtomicType] = useState(false);
 	const [fields, setFields] = useState<SchemaField[]>([]);
 
@@ -28,19 +30,23 @@ export function ProcedureInputPanel({
 			const queryObj = JSON.parse(query);
 			if (queryObj?.procedure) {
 				// Check if procedure has changed
-				const procedureChanged = queryObj.procedure !== currentProcedure;
+				const procedureChanged =
+					queryObj.procedure !== currentProcedure;
 				setCurrentProcedure(queryObj.procedure);
 
 				// If procedure changed, we need to update the input with default values
 				if (procedureChanged && introspectionData) {
 					const procedure = introspectionData.procedures.find(
-						p => p.path === queryObj.procedure,
+						(p) => p.path === queryObj.procedure,
 					);
 					if (procedure?.inputSchema) {
-						const parsedFields = parseJsonSchema(procedure.inputSchema);
+						const parsedFields = parseJsonSchema(
+							procedure.inputSchema,
+						);
 						setFields(parsedFields);
 						const isAtomic =
-							parsedFields.length === 1 && parsedFields[0].name === 'value';
+							parsedFields.length === 1 &&
+							parsedFields[0].name === 'value';
 						setIsAtomicType(isAtomic);
 
 						// Function to get default value for a field
@@ -51,8 +57,9 @@ export function ProcedureInputPanel({
 
 							// Handle nested objects
 							if (field.type === 'object' && field.properties) {
-								const defaultObject: Record<string, unknown> = {};
-								field.properties.forEach(prop => {
+								const defaultObject: Record<string, unknown> =
+									{};
+								field.properties.forEach((prop) => {
 									const value = getDefaultValue(prop);
 									if (value !== undefined) {
 										defaultObject[prop.name] = value;
@@ -88,7 +95,7 @@ export function ProcedureInputPanel({
 
 						// Create default input object
 						const defaultInput: Record<string, unknown> = {};
-						parsedFields.forEach(field => {
+						parsedFields.forEach((field) => {
 							defaultInput[field.name] = getDefaultValue(field);
 						});
 
@@ -110,10 +117,13 @@ export function ProcedureInputPanel({
 				}
 
 				// Handle normal input updates
-				if (typeof queryObj.input === 'object' && queryObj.input !== null) {
+				if (
+					typeof queryObj.input === 'object' &&
+					queryObj.input !== null
+				) {
 					// For object fields, only include the field inputs
 					const fieldInputs: Record<string, string> = {};
-					fields.forEach(field => {
+					fields.forEach((field) => {
 						const value = queryObj.input[field.name];
 						if (field.isAtomic) {
 							// For atomic fields, stringify objects and arrays
@@ -124,7 +134,9 @@ export function ProcedureInputPanel({
 							}
 						} else if (value !== undefined && value !== null) {
 							fieldInputs[field.name] =
-								typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+								typeof value === 'string'
+									? value
+									: JSON.stringify(value, null, 2);
 						}
 					});
 					setInputValues(fieldInputs);
@@ -151,7 +163,9 @@ export function ProcedureInputPanel({
 			return;
 		}
 
-		const procedure = introspectionData.procedures.find(p => p.path === currentProcedure);
+		const procedure = introspectionData.procedures.find(
+			(p) => p.path === currentProcedure,
+		);
 		if (!procedure?.inputSchema) {
 			setFields([]);
 			return;
@@ -159,7 +173,9 @@ export function ProcedureInputPanel({
 
 		const parsedFields = parseJsonSchema(procedure.inputSchema);
 		setFields(parsedFields);
-		setIsAtomicType(parsedFields.length === 1 && parsedFields[0].name === 'value');
+		setIsAtomicType(
+			parsedFields.length === 1 && parsedFields[0].name === 'value',
+		);
 	}, [introspectionData, currentProcedure]);
 
 	const handleInputChange = useCallback(
@@ -176,7 +192,7 @@ export function ProcedureInputPanel({
 
 				// For object fields, parse the values based on their types
 				if (!isAtomicType) {
-					fields.forEach(field => {
+					fields.forEach((field) => {
 						const value = newInputValues[field.name];
 						if (value !== undefined) {
 							try {
@@ -201,14 +217,24 @@ export function ProcedureInputPanel({
 	const handleProcedureChange = useCallback(
 		(value: string) => {
 			try {
-				const procedure = introspectionData?.procedures.find(p => p.path === value);
+				const procedure = introspectionData?.procedures.find(
+					(p) => p.path === value,
+				);
 				if (!procedure?.inputSchema) {
-					setQuery(JSON.stringify({ procedure: value, input: {} }, null, 2));
+					setQuery(
+						JSON.stringify(
+							{ procedure: value, input: {} },
+							null,
+							2,
+						),
+					);
 					return;
 				}
 
 				const parsedFields = parseJsonSchema(procedure.inputSchema);
-				const isAtomic = parsedFields.length === 1 && parsedFields[0].name === 'value';
+				const isAtomic =
+					parsedFields.length === 1 &&
+					parsedFields[0].name === 'value';
 
 				if (isAtomic) {
 					const defaultValue = parsedFields[0].defaultValue ?? '';
@@ -232,7 +258,7 @@ export function ProcedureInputPanel({
 						// Handle nested objects
 						if (field.type === 'object' && field.properties) {
 							const defaultObject: Record<string, unknown> = {};
-							field.properties.forEach(prop => {
+							field.properties.forEach((prop) => {
 								const value = getDefaultValue(prop);
 								if (value !== undefined) {
 									defaultObject[prop.name] = value;
@@ -267,7 +293,7 @@ export function ProcedureInputPanel({
 					}
 
 					const defaultInput: Record<string, unknown> = {};
-					parsedFields.forEach(field => {
+					parsedFields.forEach((field) => {
 						defaultInput[field.name] = getDefaultValue(field);
 					});
 
@@ -284,7 +310,9 @@ export function ProcedureInputPanel({
 				}
 			} catch {
 				// Invalid JSON, ignore
-				setQuery(JSON.stringify({ procedure: value, input: {} }, null, 2));
+				setQuery(
+					JSON.stringify({ procedure: value, input: {} }, null, 2),
+				);
 			}
 		},
 		[introspectionData, setQuery],

@@ -112,7 +112,7 @@ export const exampleRouter = createTRPCRouter({
 			} = pagination || {};
 
 			// Filter users based on search query and filters
-			const filteredUsers = users.filter(user => {
+			const filteredUsers = users.filter((user) => {
 				const matchesQuery =
 					user.name.toLowerCase().includes(query.toLowerCase()) ||
 					user.email.toLowerCase().includes(query.toLowerCase());
@@ -121,11 +121,23 @@ export const exampleRouter = createTRPCRouter({
 
 				if (filters) {
 					if (filters.ageRange) {
-						if (filters.ageRange.min && user.age < filters.ageRange.min) return false;
-						if (filters.ageRange.max && user.age > filters.ageRange.max) return false;
+						if (
+							filters.ageRange.min &&
+							user.age < filters.ageRange.min
+						)
+							return false;
+						if (
+							filters.ageRange.max &&
+							user.age > filters.ageRange.max
+						)
+							return false;
 					}
 					if (filters.tags && filters.tags.length > 0) {
-						if (!filters.tags.some((tag: string) => user.tags.includes(tag)))
+						if (
+							!filters.tags.some((tag: string) =>
+								user.tags.includes(tag),
+							)
+						)
 							return false;
 					}
 					if (filters.hasAddress !== undefined) {
@@ -142,7 +154,13 @@ export const exampleRouter = createTRPCRouter({
 				const aValue = a[sortBy as keyof User];
 				const bValue = b[sortBy as keyof User];
 				if (aValue === undefined || bValue === undefined) return 0;
-				return sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
+				return sortOrder === 'asc'
+					? aValue > bValue
+						? 1
+						: -1
+					: aValue < bValue
+						? 1
+						: -1;
 			});
 
 			// Apply pagination
@@ -182,7 +200,7 @@ export const exampleRouter = createTRPCRouter({
 		.input(z.string())
 		.output(UserSchema)
 		.query(({ input }) => {
-			const user = users.find(u => u.id === input);
+			const user = users.find((u) => u.id === input);
 			if (!user) {
 				throw new Error(`User with ID ${input} not found`);
 			}
@@ -206,7 +224,7 @@ export const exampleRouter = createTRPCRouter({
 		.query(async ({ input }) => {
 			const { delay, shouldFail } = input;
 
-			await new Promise(resolve => setTimeout(resolve, delay));
+			await new Promise((resolve) => setTimeout(resolve, delay));
 
 			if (shouldFail) {
 				throw new Error('Operation failed as requested');
@@ -236,7 +254,7 @@ export const exampleRouter = createTRPCRouter({
 			}),
 		)
 		.query(({ input }) => {
-			const user = users.find(u => u.id === input.userId);
+			const user = users.find((u) => u.id === input.userId);
 			if (!user) {
 				throw new Error(`User with ID ${input.userId} not found`);
 			}

@@ -28,19 +28,26 @@ export function ObjectInput({ field, value, onChange }: ObjectInputProps) {
 
 		return (
 			<div className="flex flex-row gap-2 items-center">
-				<Label htmlFor={field.name} className="text-sm font-medium w-1/4">
+				<Label
+					htmlFor={field.name}
+					className="text-sm font-medium w-1/4"
+				>
 					{field.name} ({field.type})
 					{!field.required && (
-						<span className="text-muted-foreground ml-1">(optional)</span>
+						<span className="text-muted-foreground ml-1">
+							(optional)
+						</span>
 					)}
 				</Label>
 				{field.description && (
-					<p className="text-sm text-muted-foreground">{field.description}</p>
+					<p className="text-sm text-muted-foreground">
+						{field.description}
+					</p>
 				)}
 				<Input
 					id={field.name}
 					value={displayValue}
-					onChange={e => onChange(e.target.value)}
+					onChange={(e) => onChange(e.target.value)}
 					placeholder="{}"
 					className="font-mono text-sm"
 				/>
@@ -72,20 +79,30 @@ export function ObjectInput({ field, value, onChange }: ObjectInputProps) {
 		<div className="space-y-2">
 			<Label htmlFor={field.name} className="text-sm font-medium">
 				{field.name} ({field.type})
-				{!field.required && <span className="text-muted-foreground ml-1">(optional)</span>}
+				{!field.required && (
+					<span className="text-muted-foreground ml-1">
+						(optional)
+					</span>
+				)}
 			</Label>
 			{field.description && (
-				<p className="text-sm text-muted-foreground">{field.description}</p>
+				<p className="text-sm text-muted-foreground">
+					{field.description}
+				</p>
 			)}
 			<div className="ml-4 mt-2 space-y-1 border-l pl-4">
-				{field.fields.map(subField => (
+				{field.fields.map((subField) => (
 					<SchemaInput
 						key={subField.name}
 						field={subField}
 						value={
-							values[subField.name] !== undefined ? String(values[subField.name]) : ''
+							values[subField.name] !== undefined
+								? String(values[subField.name])
+								: ''
 						}
-						onChange={value => handleFieldChange(subField.name, value)}
+						onChange={(value) =>
+							handleFieldChange(subField.name, value)
+						}
 					/>
 				))}
 			</div>

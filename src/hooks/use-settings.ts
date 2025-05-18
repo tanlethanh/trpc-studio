@@ -54,7 +54,7 @@ export function useSettings() {
 	}, [settings]);
 
 	const updateEditorSettings = (updates: Partial<EditorSettings>) => {
-		setSettings(prev => ({
+		setSettings((prev) => ({
 			...prev,
 			editor: {
 				...prev.editor,
@@ -63,8 +63,10 @@ export function useSettings() {
 		}));
 	};
 
-	const updateIntrospectionSettings = (updates: Partial<IntrospectionSettings>) => {
-		setSettings(prev => ({
+	const updateIntrospectionSettings = (
+		updates: Partial<IntrospectionSettings>,
+	) => {
+		setSettings((prev) => ({
 			...prev,
 			introspection: {
 				...prev.introspection,
