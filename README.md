@@ -2,6 +2,8 @@
 
 A modern, feature-rich studio for testing and exploring tRPC endpoints. Built with Next.js, TypeScript, and Tailwind CSS.
 
+https://github.com/user-attachments/assets/261a3369-e7a1-4b35-a393-2296a70ca8bf
+
 ## Quick Start
 
 1. Add introspection to your tRPC API:
