@@ -111,7 +111,7 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
 
   const replayQuery = async (log: RequestLog) => {
     try {
-      if (!log.procedure || !log.input) {
+      if (!log.procedure || typeof log.input === 'undefined') {
         throw new Error('Invalid log entry');
       }
       await executeQuery(log.procedure, log.input);
