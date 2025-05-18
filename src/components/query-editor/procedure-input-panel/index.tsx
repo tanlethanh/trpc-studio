@@ -27,7 +27,76 @@ export function ProcedureInputPanel({
     try {
       const queryObj = JSON.parse(query);
       if (queryObj?.procedure) {
+        // Check if procedure has changed
+        const procedureChanged = queryObj.procedure !== currentProcedure;
         setCurrentProcedure(queryObj.procedure);
+
+        // If procedure changed, we need to update the input with default values
+        if (procedureChanged && introspectionData) {
+          const procedure = introspectionData.procedures.find(p => p.path === queryObj.procedure);
+          if (procedure?.inputSchema) {
+            const parsedFields = parseJsonSchema(procedure.inputSchema);
+            setFields(parsedFields);
+            const isAtomic = parsedFields.length === 1 && parsedFields[0].name === 'value';
+            setIsAtomicType(isAtomic);
+
+            // Function to get default value for a field
+            function getDefaultValue(field: SchemaField): unknown {
+              if (field.defaultValue !== undefined) {
+                return field.defaultValue;
+              }
+
+              // Handle nested objects
+              if (field.type === 'object' && field.properties) {
+                const defaultObject: Record<string, unknown> = {};
+                field.properties.forEach(prop => {
+                  const value = getDefaultValue(prop);
+                  if (value !== undefined) {
+                    defaultObject[prop.name] = value;
+                  }
+                });
+                return Object.keys(defaultObject).length > 0 ? defaultObject : undefined;
+              }
+
+              // Handle arrays
+              if (field.type === 'array' && field.items) {
+                return [];
+              }
+
+              // Set type-specific defaults
+              switch (field.type) {
+                case 'string':
+                  return '';
+                case 'number':
+                case 'integer':
+                  return 0;
+                case 'boolean':
+                  return false;
+                case 'object':
+                  return {};
+                case 'array':
+                  return [];
+                default:
+                  return null;
+              }
+            }
+
+            // Create default input object
+            const defaultInput: Record<string, unknown> = {};
+            parsedFields.forEach(field => {
+              defaultInput[field.name] = getDefaultValue(field);
+            });
+
+            // Update the query with default values
+            setQuery(JSON.stringify({
+              procedure: queryObj.procedure,
+              input: isAtomic ? defaultInput[parsedFields[0].name] : defaultInput
+            }, null, 2));
+            return;
+          }
+        }
+
+        // Handle normal input updates
         if (typeof queryObj.input === 'object' && queryObj.input !== null) {
           // For object fields, only include the field inputs
           const fieldInputs: Record<string, string> = {};
@@ -54,7 +123,7 @@ export function ProcedureInputPanel({
     } catch {
       // Invalid JSON, ignore
     }
-  }, [query, fields]);
+  }, [query, fields, currentProcedure, introspectionData, setQuery]);
 
   // Update state when query changes
   useEffect(() => {
