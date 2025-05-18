@@ -22,7 +22,7 @@ export default function Home() {
   });
   const [debouncedUrl, setDebouncedUrl] = useState(trpcUrl);
   const [query, setQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'result' | 'history' | 'introspection'>('result');
+  const [activeTab, setActiveTab] = useState<'result' | 'history' | 'introspection' | 'headers'>('result');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -41,7 +41,9 @@ export default function Home() {
     expandedLogs, 
     parseAndExecuteQuery, 
     replayQuery,
-    toggleLog 
+    toggleLog,
+    headers,
+    setHeaders
   } = useQueryExecution(trpcUrl, introspectionData);
 
   useEffect(() => {
@@ -179,6 +181,8 @@ export default function Home() {
             onReloadIntrospection={fetchIntrospection}
             isIntrospectionLoading={isIntrospectionLoading}
             introspectionError={introspectionError}
+            headers={headers}
+            onHeadersChange={setHeaders}
           />
         </div>
       </div>

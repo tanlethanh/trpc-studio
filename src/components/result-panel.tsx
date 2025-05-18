@@ -2,15 +2,21 @@ import Editor from '@monaco-editor/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { RequestHistory } from './request-history';
 import { IntrospectionView } from './introspection-view';
+import { HeadersPanel } from './headers-panel';
 import { type RequestLog } from '@/types/trpc';
 import { type IntrospectionData } from '@/types/trpc';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Clock, Code, CheckCircle2, XCircle } from 'lucide-react';
 
+interface Header {
+  key: string;
+  value: string;
+}
+
 interface ResultPanelProps {
-  activeTab: 'result' | 'history' | 'introspection';
-  setActiveTab: (tab: 'result' | 'history' | 'introspection') => void;
+  activeTab: 'result' | 'history' | 'introspection' | 'headers';
+  setActiveTab: (tab: 'result' | 'history' | 'introspection' | 'headers') => void;
   result: unknown;
   error: string | null;
   requestLogs: RequestLog[];
@@ -22,6 +28,8 @@ interface ResultPanelProps {
   onReloadIntrospection: () => void;
   isIntrospectionLoading: boolean;
   introspectionError: string | null;
+  headers: Header[];
+  onHeadersChange: (headers: Header[]) => void;
 }
 
 export function ResultPanel({ 
@@ -37,7 +45,9 @@ export function ResultPanel({
   introspectionData,
   onReloadIntrospection,
   isIntrospectionLoading,
-  introspectionError
+  introspectionError,
+  headers,
+  onHeadersChange
 }: ResultPanelProps) {
   const { theme } = useTheme();
   const lastLog = requestLogs[requestLogs.length - 1];
@@ -76,6 +86,16 @@ export function ResultPanel({
               }`}
             >
               Introspection
+            </button>
+            <button
+              onClick={() => setActiveTab('headers')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                activeTab === 'headers'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              Headers
             </button>
           </div>
           {activeTab === 'introspection' && (
@@ -149,6 +169,11 @@ export function ResultPanel({
             toggleLog={toggleLog}
             replayQuery={replayQuery}
             isLoading={isLoading}
+          />
+        ) : activeTab === 'headers' ? (
+          <HeadersPanel
+            headers={headers}
+            onChange={onHeadersChange}
           />
         ) : (
           <IntrospectionView 

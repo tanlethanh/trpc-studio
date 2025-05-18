@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import { type RequestLog, type IntrospectionData } from '@/types/trpc';
+
+interface Header {
+  key: string;
+  value: string;
+}
 
 export function useQueryExecution(trpcUrl: string, introspectionData: IntrospectionData | null) {
   const [result, setResult] = useState<unknown>(null);
@@ -8,6 +13,27 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
   const [requestLogs, setRequestLogs] = useState<RequestLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedLogs, setExpandedLogs] = useState<number[]>([]);
+  const [headers, setHeaders] = useState<Header[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const stored = localStorage.getItem('trpc-playground-headers');
+    if (!stored) return [
+      { key: 'Authorization', value: '' },
+      { key: 'Content-Type', value: 'application/json' }
+    ];
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return [
+        { key: 'Authorization', value: '' },
+        { key: 'Content-Type', value: 'application/json' }
+      ];
+    }
+  });
+
+  // Save headers to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('trpc-playground-headers', JSON.stringify(headers));
+  }, [headers]);
 
   const executeQuery = async (procedure: string, input: unknown) => {
     try {
@@ -15,8 +41,21 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
       setError(null);
       const startTime = performance.now();
       
+      // Convert headers array to object for tRPC client
+      const headerObject = headers.reduce((acc, { key, value }) => {
+        if (key && value) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+
       const client = createTRPCProxyClient({
-        links: [httpBatchLink({ url: trpcUrl })],
+        links: [
+          httpBatchLink({ 
+            url: trpcUrl,
+            headers: headerObject
+          })
+        ],
       });
 
       // Get the procedure type from introspection data
@@ -100,5 +139,7 @@ export function useQueryExecution(trpcUrl: string, introspectionData: Introspect
     parseAndExecuteQuery,
     replayQuery,
     toggleLog,
+    headers,
+    setHeaders,
   };
 } 
