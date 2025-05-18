@@ -74,3 +74,85 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Code block styles */
+pre {
+  @apply rounded-lg border bg-muted p-4 overflow-x-auto;
+}
+
+pre code {
+  @apply block text-sm;
+}
+
+code {
+  @apply rounded bg-muted px-1.5 py-0.5 text-sm font-mono;
+}
+
+/* Syntax highlighting */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  @apply text-[#5c6370] dark:text-[#5c6370];
+}
+
+.token.punctuation {
+  @apply text-[#abb2bf] dark:text-[#abb2bf];
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  @apply text-[#d19a66] dark:text-[#d19a66];
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  @apply text-[#98c379] dark:text-[#98c379];
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  @apply text-[#abb2bf] dark:text-[#abb2bf];
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  @apply text-[#c678dd] dark:text-[#c678dd];
+}
+
+.token.function,
+.token.class-name {
+  @apply text-[#61afef] dark:text-[#61afef];
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  @apply text-[#e06c75] dark:text-[#e06c75];
+}
+
+.token.important,
+.token.bold {
+  font-weight: 700;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  @apply cursor-help;
+}

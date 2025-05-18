@@ -89,7 +89,7 @@ export default function Home() {
 		<div className="flex flex-col h-screen">
 			<Header trpcUrl={trpcUrl} setTrpcUrl={setTrpcUrl} />
 
-			<div className="flex-1 p-4">
+			<div className="flex-1 px-4 py-3">
 				<PanelGroup direction={isMobile ? 'vertical' : 'horizontal'}>
 					<Panel defaultSize={60} minSize={30}>
 						<QueryEditor
