@@ -1,16 +1,61 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
+import pluginImport from 'eslint-plugin-import';
+import pluginPrettier from 'eslint-plugin-prettier';
+import pluginReact from 'eslint-plugin-react';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import pluginJest from 'eslint-plugin-jest';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-];
-
-export default eslintConfig;
+export default defineConfig([
+	tseslint.configs.recommended,
+	pluginReact.configs.flat.recommended,
+	{
+		files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
+		languageOptions: { globals: { ...globals.browser, ...globals.node } },
+		plugins: { js, prettier: pluginPrettier, import: pluginImport },
+		extends: ['js/recommended'],
+		settings: {
+			react: {
+				version: 'detect',
+			},
+		},
+		rules: {
+			'no-unused-vars': 'off',
+			'@typescript-eslint/no-unused-vars': 'error',
+			'@typescript-eslint/no-require-imports': 'off',
+			'react/react-in-jsx-scope': 'off',
+			'react/no-unescaped-entities': 'off',
+			'no-empty': 'off',
+			'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+			'import/order': [
+				'error',
+				{
+					groups: [
+						'builtin',
+						'external',
+						'internal',
+						'object',
+						['parent', 'sibling'],
+						'index',
+					],
+				},
+			],
+			'prettier/prettier': [
+				'error',
+				{
+					endOfLine: 'auto',
+					useTabs: true,
+					trailingComma: 'all',
+					singleQuote: true,
+					tabWidth: 4,
+				},
+			],
+		},
+	},
+	{
+		files: ['tests/**/*'],
+		plugins: { jest: pluginJest },
+		languageOptions: { globals: { ...globals.jest } },
+	},
+]);

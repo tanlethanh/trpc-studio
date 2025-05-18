@@ -10,7 +10,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -40,17 +41,24 @@
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
     "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.23.0",
     "@shadcn/ui": "^0.0.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.19",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.2",
+    "eslint": "^9.23.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
     "postcss": "^8.4.35",
+    "prettier": "^3.5.3",
     "sharp": "^0.34.1",
     "tailwindcss": "^3.4.1",
     "turbo": "^1.12.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.27.0"
   }
 }
