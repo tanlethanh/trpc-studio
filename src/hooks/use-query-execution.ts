@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-import { type RequestLog } from '@/types/trpc';
+import { type RequestLog, type IntrospectionData } from '@/types/trpc';
 
-export function useQueryExecution(trpcUrl: string) {
+export function useQueryExecution(trpcUrl: string, introspectionData: IntrospectionData | null) {
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
   const [requestLogs, setRequestLogs] = useState<RequestLog[]>([]);
@@ -19,9 +19,14 @@ export function useQueryExecution(trpcUrl: string) {
         links: [httpBatchLink({ url: trpcUrl })],
       });
 
-      // Use dynamic procedure call
+      // Get the procedure type from introspection data
+      const procedureInfo = introspectionData?.procedures.find(p => p.path === procedure);
+      const isMutation = procedureInfo?.type === 'mutation';
+
+      // Access the procedure first, then call the appropriate method
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await (client as any)[procedure].query(input);
+      const procedureClient = (client as any)[procedure];
+      const result = await (isMutation ? procedureClient.mutate(input) : procedureClient.query(input));
       const endTime = performance.now();
       
       setResult(result);

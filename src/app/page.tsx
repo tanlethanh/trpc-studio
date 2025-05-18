@@ -40,7 +40,7 @@ export default function Home() {
     parseAndExecuteQuery, 
     replayQuery,
     toggleLog 
-  } = useQueryExecution(trpcUrl);
+  } = useQueryExecution(trpcUrl, introspectionData);
 
   useEffect(() => {
     fetchIntrospection();
