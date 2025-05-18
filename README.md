@@ -2,7 +2,7 @@
 
 A modern, feature-rich studio for testing and exploring tRPC endpoints. Built with Next.js, TypeScript, and Tailwind CSS.
 
-https://github.com/user-attachments/assets/261a3369-e7a1-4b35-a393-2296a70ca8bf
+https://github.com/user-attachments/assets/ba3ef3e7-0641-47cc-9f45-0aca86d80883
 
 ## Quick Start
 
