@@ -1,0 +1,17 @@
+{
+  "name": "tRPC Playground",
+  "short_name": "tRPC",
+  "description": "A playground for testing tRPC endpoints",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#191919",
+  "theme_color": "#191919",
+  "icons": [
+    {
+      "src": "/trpc-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+} 
