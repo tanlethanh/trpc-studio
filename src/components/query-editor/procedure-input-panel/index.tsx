@@ -34,9 +34,14 @@ export function ProcedureInputPanel({
           fields.forEach(field => {
             const value = queryObj.input[field.name];
             if (field.isAtomic) {
-              fieldInputs[field.name] = String(value || '');
+              // For atomic fields, stringify objects and arrays
+              if (typeof value === 'object' && value !== null) {
+                fieldInputs[field.name] = JSON.stringify(value);
+              } else {
+                fieldInputs[field.name] = String(value || '');
+              }
             } else if (value !== undefined && value !== null) {
-              fieldInputs[field.name] = typeof value === 'string' ? value : JSON.stringify(value);
+              fieldInputs[field.name] = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
             }
           });
           setInputValues(fieldInputs);

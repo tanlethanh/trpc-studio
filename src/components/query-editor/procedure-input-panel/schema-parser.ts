@@ -32,7 +32,20 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
   }
   
   // Handle object types
-  if (schemaObj.type === 'object' && schemaObj.properties) {
+  if (schemaObj.type === 'object') {
+    // If it's an empty object or has additionalProperties, treat it as atomic
+    if (!schemaObj.properties || (schemaObj.additionalProperties && !schemaObj.properties)) {
+      return [{
+        name: 'value',
+        type: 'object',
+        description: schemaObj.description as string | undefined,
+        required: !schemaObj.nullable,
+        defaultValue: schemaObj.default ?? {},
+        metadata: {},
+        isAtomic: true
+      }];
+    }
+
     const properties = schemaObj.properties as Record<string, unknown>;
     const required = (schemaObj.required as string[]) || [];
     
@@ -46,8 +59,14 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
       if (field.enum) metadata.enum = field.enum as unknown[];
       if (field.examples) metadata.examples = field.examples as unknown[];
 
-      const isAtomic = field.type === 'string' || field.type === 'number' || field.type === 'boolean';
-      const parsedFields = field.type === 'object' ? parseJsonSchema(field) : undefined;
+      const isAtomic = Boolean(
+        field.type === 'string' || 
+        field.type === 'number' || 
+        field.type === 'boolean' || 
+        field.type === 'array' ||
+        (field.type === 'object' && (!field.properties || field.additionalProperties))
+      );
+      const parsedFields = field.type === 'object' && field.properties ? parseJsonSchema(field) : undefined;
       
       return {
         name: key,
@@ -76,9 +95,10 @@ export function parseJsonSchema(schema: unknown): SchemaField[] {
       type: getJsonSchemaType(items),
       description: schemaObj.description as string | undefined,
       required: true,
+      defaultValue: schemaObj.default ?? [],
       metadata,
       fields: items.type === 'object' ? parseJsonSchema(items) : undefined,
-      isAtomic: false
+      isAtomic: true
     }];
   }
 

@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type SchemaField } from '../types';
-import { SchemaInput } from './schema-input';
 
 interface ArrayInputProps {
   field: SchemaField;
@@ -10,12 +11,27 @@ interface ArrayInputProps {
 }
 
 export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
-  const items = field.fields?.[0];
-  if (!items) return null;
+  let values: unknown[] = [];
+  try {
+    // Handle both string and array values
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      values = parsed;
+    } else if (typeof parsed === 'string') {
+      // Handle case where value is a stringified array
+      const innerParsed = JSON.parse(parsed);
+      values = Array.isArray(innerParsed) ? innerParsed : [innerParsed];
+    } else {
+      values = [];
+    }
+  } catch {
+    values = [];
+  }
 
-  const values = value ? JSON.parse(value) : [];
   const minItems = field.metadata?.minItems as number | undefined;
   const maxItems = field.metadata?.maxItems as number | undefined;
+  const items = field.fields?.[0];
+  const isEnum = items?.metadata?.enum;
 
   const handleAdd = () => {
     if (maxItems && values.length >= maxItems) return;
@@ -25,11 +41,11 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 
   const handleRemove = (index: number) => {
     if (minItems && values.length <= minItems) return;
-    const newValues = values.filter((_: unknown, i: number) => i !== index);
+    const newValues = values.filter((_, i) => i !== index);
     onChange(JSON.stringify(newValues));
   };
 
-  const handleItemChange = (index: number, newValue: string) => {
+  const handleValueChange = (index: number, newValue: string) => {
     const newValues = [...values];
     newValues[index] = newValue;
     onChange(JSON.stringify(newValues));
@@ -37,11 +53,52 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label htmlFor={field.name} className="text-sm font-medium">
+      <div className="flex items-center gap-2">
+        <Label htmlFor={field.name} className="text-sm font-medium whitespace-nowrap">
           {field.name} ({field.type})
           {!field.required && <span className="text-muted-foreground ml-1">(optional)</span>}
         </Label>
+        <div className="flex flex-wrap gap-2">
+          {values.map((item: unknown, index: number) => (
+            <div key={index} className="flex items-center gap-1">
+              <div className="w-32">
+                {isEnum ? (
+                  <Select
+                    value={String(item)}
+                    onValueChange={(value) => handleValueChange(index, value)}
+                  >
+                    <SelectTrigger className="h-8">
+                      <SelectValue placeholder="Select value" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(items?.metadata?.enum as string[] | undefined)?.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    value={String(item)}
+                    onChange={(e) => handleValueChange(index, e.target.value)}
+                    placeholder="Enter value"
+                    className="font-mono text-sm h-8"
+                  />
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleRemove(index)}
+                disabled={minItems !== undefined && values.length <= minItems}
+                className="h-8 w-8 p-0"
+              >
+                ×
+              </Button>
+            </div>
+          ))}
+        </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -64,27 +121,6 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
       {field.description && (
         <p className="text-sm text-muted-foreground">{field.description}</p>
       )}
-      <div className="space-y-2">
-        {values.map((item: string, index: number) => (
-          <div key={index} className="flex items-start gap-2">
-            <div className="flex-1">
-              <SchemaInput
-                field={items}
-                value={item}
-                onChange={(value) => handleItemChange(index, value)}
-              />
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleRemove(index)}
-              disabled={minItems !== undefined && values.length <= minItems}
-            >
-              ×
-            </Button>
-          </div>
-        ))}
-      </div>
     </div>
   );
 } 
