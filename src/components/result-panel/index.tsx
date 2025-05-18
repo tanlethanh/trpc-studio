@@ -1,8 +1,8 @@
 import Editor from '@monaco-editor/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { RequestHistory } from './request-history';
-import { IntrospectionView } from './introspection-view';
-import { HeadersPanel } from './headers-panel';
+import { RequestHistory } from '@/components/result-panel/request-history';
+import { IntrospectionView } from '@/components/introspection-view';
+import { HeadersPanel } from '@/components/headers-panel';
 import { type RequestLog } from '@/types/trpc';
 import { type IntrospectionData } from '@/types/trpc';
 import { useTheme } from 'next-themes';
