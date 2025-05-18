@@ -90,10 +90,7 @@ export default function Home() {
 			<Header trpcUrl={trpcUrl} setTrpcUrl={setTrpcUrl} />
 
 			<div className="flex-1 p-4">
-				<PanelGroup
-					direction={isMobile ? 'vertical' : 'horizontal'}
-					autoSaveId="desktop-layout"
-				>
+				<PanelGroup direction={isMobile ? 'vertical' : 'horizontal'}>
 					<Panel defaultSize={60} minSize={30}>
 						<QueryEditor
 							key={JSON.stringify(introspectionData)}

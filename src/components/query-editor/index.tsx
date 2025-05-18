@@ -110,7 +110,7 @@ export function QueryEditor({
 			<CardContent className="flex-1 p-0 min-h-0">
 				<PanelGroup direction="vertical" className="h-full">
 					<Panel
-						defaultSize={100}
+						defaultSize={60}
 						minSize={30}
 						className="min-h-[200px]"
 					>
@@ -124,9 +124,9 @@ export function QueryEditor({
 							/>
 						</div>
 					</Panel>
-					<PanelResizeHandle className="h-1 bg-border hover:bg-primary/50 transition-colors hidden md:block" />
+					<PanelResizeHandle className="h-[3px] bg-border hover:bg-primary/50 transition-colors hidden md:block" />
 					<Panel
-						defaultSize={30}
+						defaultSize={40}
 						minSize={20}
 						className="min-h-[200px] hidden md:block"
 					>

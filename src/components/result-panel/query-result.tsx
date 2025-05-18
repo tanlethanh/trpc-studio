@@ -1,7 +1,7 @@
 import { Editor } from '@monaco-editor/react';
 import { CheckCircle2, Clock, Code, XCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import * as monaco from 'monaco-editor';
 import type { RequestLog } from '@/types/trpc';
 
@@ -15,8 +15,18 @@ export function QueryResult({ lastLog, error, result }: Props) {
 	const { theme } = useTheme();
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
+	useEffect(() => {
+		// Trigger editor resize when lastLog changes
+		if (editorRef.current) {
+			editorRef.current.layout({
+				width: undefined as never,
+				height: undefined as never,
+			});
+		}
+	}, [lastLog]);
+
 	return (
-		<div className="h-full flex flex-col">
+		<div className="h-full flex flex-col overflow-hidden">
 			{lastLog && (
 				<div className="flex-none border-b bg-muted/30 p-2">
 					<div className="flex items-center gap-4 text-sm">
@@ -44,7 +54,7 @@ export function QueryResult({ lastLog, error, result }: Props) {
 					</div>
 				</div>
 			)}
-			<div className="flex-1">
+			<div className="flex-1 min-h-0">
 				<Editor
 					height="100%"
 					defaultLanguage="json"
