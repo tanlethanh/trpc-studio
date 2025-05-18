@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# tRPC Studio
 
-## Getting Started
+A modern, feature-rich studio for testing and exploring tRPC endpoints. Built with Next.js, TypeScript, and Tailwind CSS.
 
-First, run the development server:
+## Quick Start
 
+1. Add introspection to your tRPC API:
 ```bash
-npm run dev
+npm install @trpc-studio/introspection
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn add @trpc-studio/introspection
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```ts
+import { createTRPCRouter } from '@trpc/server';
+import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+export const appRouter = addIntrospectionEndpoint(
+  createTRPCRouter({})
+);
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Visit [tRPC Studio](https://trpc-studio.vercel.app)
+3. Enter your API URL (e.g., `https://your-api.com/api/trpc`)
+4. Start testing your procedures!
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- 🔍 Interactive tRPC endpoint testing
+- 📝 JSON Schema-based input validation
+- 🔄 Request history with replay capability
+- 🌓 Dark/Light mode support
+- 📱 Responsive design
+- 🎨 Modern UI with Tailwind CSS
+- ⚡ Fast and efficient with Next.js
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Development
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Install dependencies
+yarn install
 
-## Deploy on Vercel
+# Start development server
+yarn dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

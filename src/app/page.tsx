@@ -10,6 +10,8 @@ import { useIntrospection } from '@/hooks/use-introspection';
 import { useQueryExecution } from '@/hooks/use-query-execution';
 import { type RequestLog } from '@/types/trpc';
 import { usePanelResize } from '@/hooks/use-panel-resize';
+import { Button } from '@/components/ui/button';
+import { Github } from 'lucide-react';
 
 export default function Home() {
   const [trpcUrl, setTrpcUrl] = useState(() => {
@@ -97,7 +99,24 @@ export default function Home() {
               Test your tRPC endpoints with ease
             </p>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="h-9 w-9"
+            >
+              <a
+                href="https://github.com/tanlethanh/trpc-studio"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub Repository"
+              >
+                <Github className="h-[1.2rem] w-[1.2rem]" />
+              </a>
+            </Button>
+            <ThemeToggle />
+          </div>
         </div>
         
         <div className="flex items-center gap-2 text-sm">

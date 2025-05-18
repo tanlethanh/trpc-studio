@@ -1,61 +1,43 @@
-# tRPC Introspection
+# @trpc-studio/introspection
 
-A package that provides introspection capabilities for tRPC APIs. This package adds an introspection endpoint to your tRPC router that exposes procedure information, including input and output schemas.
+Add introspection capabilities to your tRPC API for use with [tRPC Studio](https://trpc-studio.vercel.app).
 
-## Features
+[GitHub](https://github.com/tanlethanh/trpc-studio/tree/main/packages/introspection)
 
-- 🔍 Exposes procedure information through an introspection endpoint
-- 📝 Converts Zod schemas to JSON Schema format
-- 🔒 Optional security through path customization
-- 🎯 Type-safe procedure information
+**Keywords:** tRPC, API Introspection, TypeScript, API Schema, JSON Schema, tRPC Studio, API Testing, TypeScript API
 
-## Installation
+## Quick Start
 
 ```bash
-npm install @trpc-playground/introspection
+npm install @trpc-studio/introspection
+# or
+yarn add @trpc-studio/introspection
 ```
 
-## Usage
-
-```tsx
-import { createIntrospectionRouter } from '@trpc-playground/introspection';
+```ts
 import { createTRPCRouter } from '@trpc/server';
+import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
 
-const appRouter = createTRPCRouter({
-  // Your existing routers...
-});
+export const appRouter = addIntrospectionEndpoint(
+  createTRPCRouter({})
+);
 
-// Add introspection router
-const router = createIntrospectionRouter(appRouter, {
-  enabled: process.env.NODE_ENV !== 'production',
-  path: '/introspection'
-});
-
-export type AppRouter = typeof router;
+export type AppRouter = typeof appRouter;
 ```
+
+## Usage with tRPC Studio
+
+1. Add the introspection endpoint to your tRPC router
+2. Visit [tRPC Studio](https://trpc-studio.vercel.app)
+3. Enter your API URL (e.g., `https://your-api.com/api/trpc`)
+4. Start testing your procedures!
 
 ## Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | `boolean` | `true` | Whether to enable the introspection endpoint |
-| `path` | `string` | `/introspection` | The path for the introspection endpoint |
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build package
-npm run build
-
-# Run linter
-npm run lint
-```
+| Option   | Type      | Default            | Description                                 |
+|----------|-----------|--------------------|---------------------------------------------|
+| enabled  | boolean   | true               | Enable/disable introspection endpoint       |
+| path     | string    | '/introspection'   | Customize introspection endpoint path       |
 
 ## License
 

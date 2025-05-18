@@ -1,21 +1,36 @@
 {
-  "name": "@trpc-playground/introspection",
+  "name": "@trpc-studio/introspection",
   "version": "0.1.0",
-  "main": "src/index.ts",
+  "main": "./dist/index.ts",
   "sideEffects": false,
   "license": "MIT",
-  "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tanlethanh/trpc-studio",
+    "directory": "packages/introspection"
   },
-  "dependencies": {
-    "@trpc/server": "^11.1.2",
-    "zod": "^3.22.4"
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --tsconfig tsconfig.json",
+    "dev": "tsup src/index.ts --format cjs,esm --watch --dts --tsconfig tsconfig.json",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "prepare": "rm -rf dist && yarn build && bun run prepare.ts",
+    "release": "yarn prepare && cd dist && npm publish --access public && cd .."
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@trpc/server": "^11",
+    "zod": "^3"
   },
   "devDependencies": {
+    "@trpc/server": "^11.1.2",
     "@types/node": "^20",
     "tsup": "^8.0.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "zod": "^3.22.4"
   }
 }

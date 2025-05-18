@@ -1,5 +1,5 @@
 {
-  "name": "trpc-playground",
+  "name": "trpc-studio",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -38,6 +38,7 @@
     "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.4",
     "@eslint/eslintrc": "^3",
     "@shadcn/ui": "^0.0.4",
     "@types/node": "^20",
@@ -48,6 +49,7 @@
     "eslint-config-next": "15.3.2",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
+    "turbo": "^1.12.4",
     "typescript": "^5"
   }
 }
