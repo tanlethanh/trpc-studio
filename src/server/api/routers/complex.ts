@@ -76,7 +76,39 @@ const products = [
   },
 ];
 
-const orders: z.infer<typeof OrderSchema>[] = [];
+const orders: z.infer<typeof OrderSchema>[] = [{
+  id: '1',
+  userId: '1',
+  products: [{
+    productId: '1',
+    quantity: 1,
+  }],
+  status: 'pending',
+  shippingAddress: {
+    street: '123 Main St',
+    city: 'Anytown',
+    country: 'USA',
+    zipCode: '12345',
+  },
+  createdAt: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+  updatedAt: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+}, {
+  id: '2',
+  userId: '1',
+  products: [{
+    productId: '2',
+    quantity: 1,
+  }],
+  status: 'pending',
+  shippingAddress: {
+    street: '456 Oak St',
+    city: 'Othertown',
+    country: 'USA',
+    zipCode: '67890',
+  },
+  createdAt: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+  updatedAt: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+}];
 const notifications: z.infer<typeof NotificationSchema>[] = [];
 
 export const complexRouter = createTRPCRouter({
@@ -197,7 +229,7 @@ export const complexRouter = createTRPCRouter({
   // Subscription for real-time updates
   subscribeToNotifications: publicProcedure
     .input(z.object({
-      userId: z.string(),
+      userId: z.string().default("1"),
     }))
     .subscription(({ input }) => {
       return observable<{ notification: z.infer<typeof NotificationSchema> }>((emit: Observer<{ notification: z.infer<typeof NotificationSchema> }, unknown>) => {
@@ -244,10 +276,10 @@ export const complexRouter = createTRPCRouter({
   // Complex query with data aggregation
   getOrderAnalytics: publicProcedure
     .input(z.object({
-      userId: z.string(),
+      userId: z.string().default("1"),
       timeRange: z.object({
-        start: z.string().datetime(),
-        end: z.string().datetime(),
+        start: z.string().datetime().default(new Date(new Date().setDate(new Date().getDate() - 3)).toISOString()),
+        end: z.string().datetime().default(new Date(new Date().setDate(new Date().getDate() + 3)).toISOString()),
       }),
     }))
     .output(z.object({
