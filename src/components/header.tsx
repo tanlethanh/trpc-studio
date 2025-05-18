@@ -60,7 +60,7 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 						<div className="flex items-center gap-2">
 							<Button variant="ghost" size="icon" asChild>
 								<a
-									href="https://github.com/trpc/trpc"
+									href="https://github.com/tanlethanh/trpc-studio"
 									target="_blank"
 									rel="noopener noreferrer"
 								>
@@ -139,7 +139,7 @@ export function Header({ trpcUrl, setTrpcUrl }: HeaderProps) {
 									className="h-9 w-9"
 								>
 									<a
-										href="https://github.com/trpc/trpc"
+										href="https://github.com/tanlethanh/trpc-studio"
 										target="_blank"
 										rel="noopener noreferrer"
 										aria-label="GitHub Repository"
