@@ -1,6 +1,6 @@
 # tRPC Studio
 
-A modern, feature-rich studio for testing and exploring tRPC endpoints. Built with Next.js, TypeScript, and Tailwind CSS.
+A modern, simple studio for testing and exploring tRPC endpoints.
 
 https://github.com/user-attachments/assets/ba3ef3e7-0641-47cc-9f45-0aca86d80883
 
@@ -25,16 +25,6 @@ export const appRouter = addIntrospectionEndpoint(
 2. Visit [tRPC Studio](https://trpc-studio.vercel.app)
 3. Enter your API URL (e.g., `https://your-api.com/api/trpc`)
 4. Start testing your procedures!
-
-## Features
-
-- 🔍 Interactive tRPC endpoint testing
-- 📝 JSON Schema-based input validation
-- 🔄 Request history with replay capability
-- 🌓 Dark/Light mode support
-- 📱 Responsive design
-- 🎨 Modern UI with Tailwind CSS
-- ⚡ Fast and efficient with Next.js
 
 ## Development
 
