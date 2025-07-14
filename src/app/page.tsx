@@ -13,10 +13,15 @@ import { useMedia } from '@/components/use-media';
 export default function Home() {
 	const [trpcUrl, setTrpcUrl] = useState(() => {
 		if (typeof window !== 'undefined') {
-			return `${window.location.origin}/api/trpc`;
+			return localStorage.getItem('trpc-url') || `${window.location.origin}/api/trpc`;
 		}
 		return '/api/trpc';
 	});
+
+	useEffect(() => {
+		localStorage.setItem('trpc-url', trpcUrl);
+	}, [trpcUrl]);
+
 	const [debouncedUrl, setDebouncedUrl] = useState(trpcUrl);
 	const [query, setQuery] = useState('');
 	const [activeTab, setActiveTab] = useState<
