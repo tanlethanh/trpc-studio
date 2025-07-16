@@ -18,10 +18,7 @@ export function QueryResult({ lastLog, error, result }: Props) {
 	useEffect(() => {
 		// Trigger editor resize when lastLog changes
 		if (editorRef.current) {
-			editorRef.current.layout({
-				width: undefined as never,
-				height: undefined as never,
-			});
+			editorRef.current.layout();
 		}
 	}, [lastLog]);
 

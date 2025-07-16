@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
 	ChevronLeft,
 	Code,
@@ -16,12 +16,14 @@ import { useSettings } from '@/hooks/use-settings';
 interface IntrospectionViewProps {
 	data: IntrospectionData | null;
 	isLoading: boolean;
+	isReFetching: boolean;
 	error: string | null;
 }
 
 export function IntrospectionView({
 	data,
 	isLoading,
+	isReFetching,
 	error,
 }: IntrospectionViewProps) {
 	const { settings, updateIntrospectionSettings } = useSettings();
@@ -41,7 +43,18 @@ export function IntrospectionView({
 		updateIntrospectionSettings({ viewMode: 'list' });
 	};
 
-	if (isLoading) {
+	useEffect(() => {
+		if (selectedProcedure && data?.procedures) {
+			const updatedProcedure = data.procedures.find(
+				(proc) =>
+					proc.path === selectedProcedure.path &&
+					proc.type === selectedProcedure.type,
+			);
+			setSelectedProcedure(updatedProcedure || null);
+		}
+	}, [data]);
+
+	if (isLoading && !isReFetching) {
 		return (
 			<div className="p-4 text-sm text-muted-foreground text-center">
 				Loading introspection data...

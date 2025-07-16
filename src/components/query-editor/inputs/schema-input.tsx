@@ -19,7 +19,7 @@ export function SchemaInput({ field, value, onChange }: SchemaInputProps) {
 	}
 
 	// Handle array type
-	if (field.type.startsWith('array')) {
+	if (typeof field.type === 'string' && field.type.startsWith('array')) {
 		return <ArrayInput field={field} value={value} onChange={onChange} />;
 	}
 

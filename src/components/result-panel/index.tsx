@@ -31,6 +31,7 @@ interface ResultPanelProps {
 	introspectionData: IntrospectionData | null;
 	onReloadIntrospection: () => void;
 	isIntrospectionLoading: boolean;
+	isIntrospectionReFetching: boolean;
 	introspectionError: string | null;
 	headers: Header[];
 	onHeadersChange: (headers: Header[]) => void;
@@ -52,6 +53,7 @@ export function ResultPanel({
 	introspectionError,
 	headers,
 	onHeadersChange,
+	isIntrospectionReFetching,
 }: ResultPanelProps) {
 	const lastLog = requestLogs[requestLogs.length - 1];
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -115,6 +117,7 @@ export function ResultPanel({
 					<IntrospectionView
 						data={introspectionData}
 						isLoading={isIntrospectionLoading}
+						isReFetching={isIntrospectionReFetching}
 						error={introspectionError}
 					/>
 				)}
