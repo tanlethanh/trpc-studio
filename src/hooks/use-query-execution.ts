@@ -34,26 +34,21 @@ export function useQueryExecution(
 		}
 	});
 
-	// Save headers to localStorage whenever they change
-	useEffect(() => {
-		localStorage.setItem(
-			'trpc-playground-headers',
-			JSON.stringify(headers),
-		);
-	}, [headers]);
+	const appendLog = (log: RequestLog) => {
+		setRequestLogs((prev) => [...prev, log]);
+	};
 
 	const executeQuery = async (procedure: string, input: unknown) => {
-		try {
-			setIsLoading(true);
-			setError(null);
-			const startTime = performance.now();
+		setIsLoading(true);
+		setError(null);
+		setResult(null);
+		const startTime = performance.now();
 
+		try {
 			// Convert headers array to object for tRPC client
 			const headerObject = headers.reduce(
 				(acc, { key, value }) => {
-					if (key && value) {
-						acc[key] = value;
-					}
+					if (key && value) acc[key] = value;
 					return acc;
 				},
 				{} as Record<string, string>,
@@ -80,39 +75,29 @@ export function useQueryExecution(
 			const result = await (isMutation
 				? procedureClient.mutate(input)
 				: procedureClient.query(input));
-			const endTime = performance.now();
 
+			const endTime = performance.now();
 			setResult(result);
-			setRequestLogs((prev) =>
-				[
-					{
-						timestamp: Date.now(),
-						procedure,
-						input,
-						duration: Math.round(endTime - startTime),
-						status: 'success' as const,
-						result,
-					},
-					...prev,
-				].slice(0, 10),
-			);
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : 'An error occurred';
-			setError(errorMessage);
-			setRequestLogs((prev) =>
-				[
-					{
-						timestamp: Date.now(),
-						procedure,
-						input,
-						duration: 0,
-						status: 'error' as const,
-						error: errorMessage,
-					},
-					...prev,
-				].slice(0, 10),
-			);
+			appendLog({
+				timestamp: startTime,
+				procedure,
+				input,
+				duration: Math.round(endTime - startTime),
+				status: 'success' as const,
+				result,
+			});
+		} catch (error) {
+			const endTime = performance.now();
+			const message = (error as Error).message ?? 'An error occurred';
+			setError(message);
+			appendLog({
+				timestamp: startTime,
+				procedure,
+				input,
+				duration: Math.round(endTime - startTime),
+				status: 'error' as const,
+				error: message,
+			});
 		} finally {
 			setIsLoading(false);
 		}
@@ -158,17 +143,25 @@ export function useQueryExecution(
 		);
 	};
 
+	// Save headers to localStorage whenever they change
+	useEffect(() => {
+		localStorage.setItem(
+			'trpc-playground-headers',
+			JSON.stringify(headers),
+		);
+	}, [headers]);
+
 	return {
 		result,
 		error,
 		requestLogs,
 		isLoading,
 		expandedLogs,
+		headers,
 		executeQuery,
 		parseAndExecuteQuery,
 		replayQuery,
 		toggleLog,
-		headers,
 		setHeaders,
 	};
 }
