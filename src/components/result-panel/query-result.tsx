@@ -16,7 +16,6 @@ type Props = {
 export function QueryResult({ lastLog, error, result }: Props) {
 	const { theme } = useTheme();
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-
 	useEffect(() => {
 		// Trigger editor resize when lastLog changes
 		if (editorRef.current) {

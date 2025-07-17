@@ -20,25 +20,9 @@ export default function Home() {
 		}
 		return '/api/trpc';
 	});
-
-	useEffect(() => {
-		localStorage.setItem('trpc-url', trpcUrl);
-	}, [trpcUrl]);
-
 	const [debouncedUrl, setDebouncedUrl] = useState(trpcUrl);
 	const [query, setQuery] = useState('');
-	const [activeTab, setActiveTab] = useState<
-		'result' | 'history' | 'introspection' | 'headers'
-	>('result');
 	const { isMobile } = useMedia();
-
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			setDebouncedUrl(trpcUrl);
-		}, 500);
-
-		return () => clearTimeout(timer);
-	}, [trpcUrl]);
 
 	const {
 		introspectionData,
@@ -47,6 +31,7 @@ export default function Home() {
 		isReFetching: isIntrospectionReFetching,
 		error: introspectionError,
 	} = useIntrospection(debouncedUrl);
+
 	const {
 		result,
 		error,
@@ -59,6 +44,31 @@ export default function Home() {
 		headers,
 		setHeaders,
 	} = useQueryExecution(trpcUrl, introspectionData);
+
+	const runQuery = () => {
+		parseAndExecuteQuery(query);
+	};
+
+	const handleReplayQuery = async (log: RequestLog) => {
+		console.log('replaying query', log);
+		setQuery(
+			JSON.stringify(
+				{ procedure: log.procedure, input: log.input },
+				null,
+				2,
+			),
+		);
+		await replayQuery(log);
+	};
+
+	useEffect(() => {
+		const timer = setTimeout(() => setDebouncedUrl(trpcUrl), 500);
+		return () => clearTimeout(timer);
+	}, [trpcUrl]);
+
+	useEffect(() => {
+		localStorage.setItem('trpc-url', trpcUrl);
+	}, [trpcUrl]);
 
 	useEffect(() => {
 		fetchIntrospection();
@@ -89,71 +99,49 @@ export default function Home() {
 		}
 	}, [introspectionData, query]);
 
-	const runQuery = () => {
-		parseAndExecuteQuery(query);
-	};
-
-	const handleReplayQuery = async (log: RequestLog) => {
-		console.log('replaying query', log);
-		setQuery(
-			JSON.stringify(
-				{
-					procedure: log.procedure,
-					input: log.input,
-				},
-				null,
-				2,
-			),
-		);
-		await replayQuery(log);
-	};
-
 	return (
 		<div className="flex flex-col h-screen min-h-0">
 			<Header trpcUrl={trpcUrl} setTrpcUrl={setTrpcUrl} />
 
-			<div className="flex-1 min-h-0 px-4 py-3">
-				<PanelGroup direction={isMobile ? 'vertical' : 'horizontal'}>
-					<Panel defaultSize={60} minSize={30}>
-						<QueryEditor
-							key={JSON.stringify(introspectionData)}
-							query={query}
-							setQuery={setQuery}
-							runQuery={runQuery}
-							isLoading={isLoading}
-							introspectionData={introspectionData}
-						/>
-					</Panel>
-
-					<PanelResizeHandle
-						className="bg-border hover:bg-primary/50 transition-colors"
-						style={{ width: isMobile ? '100%' : '1px' }}
+			<PanelGroup
+				className="flex-1 min-h-0 px-4 py-3"
+				direction={isMobile ? 'vertical' : 'horizontal'}
+			>
+				<Panel defaultSize={60} minSize={30}>
+					<QueryEditor
+						key={JSON.stringify(introspectionData)}
+						query={query}
+						setQuery={setQuery}
+						runQuery={runQuery}
+						isLoading={isLoading}
+						introspectionData={introspectionData}
 					/>
+				</Panel>
 
-					<Panel defaultSize={40} minSize={30}>
-						<ResultPanel
-							activeTab={activeTab}
-							setActiveTab={setActiveTab}
-							result={result}
-							error={error}
-							requestLogs={requestLogs}
-							expandedLogs={expandedLogs}
-							toggleLog={toggleLog}
-							replayQuery={handleReplayQuery}
-							isLoading={isLoading}
-							introspectionData={introspectionData}
-							onReloadIntrospection={fetchIntrospection}
-							isIntrospectionLoading={isIntrospectionLoading}
-							isIntrospectionReFetching={
-								isIntrospectionReFetching
-							}
-							introspectionError={introspectionError}
-							headers={headers}
-							onHeadersChange={setHeaders}
-						/>
-					</Panel>
-				</PanelGroup>
-			</div>
+				<PanelResizeHandle
+					className="bg-border hover:bg-primary/50 transition-colors"
+					style={{ width: isMobile ? '100%' : '1px' }}
+				/>
+
+				<Panel defaultSize={40} minSize={30}>
+					<ResultPanel
+						result={result}
+						error={error}
+						requestLogs={requestLogs}
+						expandedLogs={expandedLogs}
+						toggleLog={toggleLog}
+						replayQuery={handleReplayQuery}
+						isLoading={isLoading}
+						introspectionData={introspectionData}
+						onReloadIntrospection={fetchIntrospection}
+						isIntrospectionLoading={isIntrospectionLoading}
+						isIntrospectionReFetching={isIntrospectionReFetching}
+						introspectionError={introspectionError}
+						headers={headers}
+						onHeadersChange={setHeaders}
+					/>
+				</Panel>
+			</PanelGroup>
 		</div>
 	);
 }
