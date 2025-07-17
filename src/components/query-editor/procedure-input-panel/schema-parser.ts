@@ -152,3 +152,135 @@ export function getJsonSchemaType(schema: Record<string, unknown>): string {
 
 	return type;
 }
+
+// Utility functions extracted to prevent duplication
+export const getDefaultValue = (field: SchemaField): unknown => {
+	if (field.defaultValue !== undefined) {
+		return field.defaultValue;
+	}
+
+	// Handle nested objects
+	if (field.type === 'object' && field.properties) {
+		const defaultObject: Record<string, unknown> = {};
+		field.properties.forEach((prop) => {
+			const value = getDefaultValue(prop);
+			if (value !== undefined) {
+				defaultObject[prop.name] = value;
+			}
+		});
+		return Object.keys(defaultObject).length > 0
+			? defaultObject
+			: undefined;
+	}
+
+	// Handle arrays
+	if (field.type === 'array' && field.items) {
+		return [];
+	}
+
+	if (!field.required) return undefined;
+
+	// Set type-specific defaults
+	switch (field.type) {
+		case 'string':
+			return '';
+		case 'number':
+		case 'integer':
+			return 0;
+		case 'boolean':
+			return false;
+		case 'object':
+			return {};
+		case 'array':
+			return [];
+		default:
+			return null;
+	}
+};
+
+export const createDefaultInput = (
+	fields: SchemaField[],
+): Record<string, unknown> => {
+	const defaultInput: Record<string, unknown> = {};
+	fields.forEach((field) => {
+		const value = getDefaultValue(field);
+		if (value !== undefined) {
+			defaultInput[field.name] = value;
+		}
+	});
+	return defaultInput;
+};
+
+export const parseInputValues = (
+	input: unknown,
+	fields: SchemaField[],
+	isAtomic: boolean,
+): Record<string, string> => {
+	if (isAtomic) {
+		return { value: String(input || '') };
+	}
+
+	if (typeof input === 'object' && input !== null) {
+		const fieldInputs: Record<string, string> = {};
+		fields.forEach((field) => {
+			const value = (input as Record<string, unknown>)[field.name];
+			if (field.isAtomic) {
+				// For atomic fields, stringify objects and arrays
+				if (typeof value === 'object' && value !== null) {
+					fieldInputs[field.name] = JSON.stringify(value);
+				} else {
+					fieldInputs[field.name] = String(value || '');
+				}
+			} else if (value !== undefined && value !== null) {
+				fieldInputs[field.name] =
+					typeof value === 'string'
+						? value
+						: JSON.stringify(value, null, 2);
+			}
+		});
+		return fieldInputs;
+	}
+
+	return {};
+};
+
+export const buildQueryInput = (
+	inputValues: Record<string, string>,
+	fields: SchemaField[],
+	isAtomic: boolean,
+): unknown => {
+	if (isAtomic) {
+		return inputValues.value || '';
+	}
+
+	const queryInput: Record<string, unknown> = {};
+	fields.forEach((field) => {
+		const value = inputValues[field.name];
+		if (value === undefined || value === '') {
+			// Use default value or undefined
+			const defaultValue = getDefaultValue(field);
+			if (defaultValue !== undefined) {
+				queryInput[field.name] = defaultValue;
+			}
+		} else {
+			// Try to parse as JSON for object/array types, otherwise use as-is
+			try {
+				queryInput[field.name] = JSON.parse(value);
+			} catch {
+				// For primitive types, convert appropriately
+				switch (field.type) {
+					case 'number':
+					case 'integer':
+						queryInput[field.name] = Number(value);
+						break;
+					case 'boolean':
+						queryInput[field.name] = value === 'true';
+						break;
+					default:
+						queryInput[field.name] = value;
+				}
+			}
+		}
+	});
+	return queryInput;
+};
