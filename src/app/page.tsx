@@ -109,10 +109,10 @@ export default function Home() {
 	};
 
 	return (
-		<div className="flex flex-col h-screen">
+		<div className="flex flex-col h-screen min-h-0">
 			<Header trpcUrl={trpcUrl} setTrpcUrl={setTrpcUrl} />
 
-			<div className="flex-1 px-4 py-3">
+			<div className="flex-1 min-h-0 px-4 py-3">
 				<PanelGroup direction={isMobile ? 'vertical' : 'horizontal'}>
 					<Panel defaultSize={60} minSize={30}>
 						<QueryEditor
@@ -131,28 +131,26 @@ export default function Home() {
 					/>
 
 					<Panel defaultSize={40} minSize={30}>
-						<div className="h-full">
-							<ResultPanel
-								activeTab={activeTab}
-								setActiveTab={setActiveTab}
-								result={result}
-								error={error}
-								requestLogs={requestLogs}
-								expandedLogs={expandedLogs}
-								toggleLog={toggleLog}
-								replayQuery={handleReplayQuery}
-								isLoading={isLoading}
-								introspectionData={introspectionData}
-								onReloadIntrospection={fetchIntrospection}
-								isIntrospectionLoading={isIntrospectionLoading}
-								isIntrospectionReFetching={
-									isIntrospectionReFetching
-								}
-								introspectionError={introspectionError}
-								headers={headers}
-								onHeadersChange={setHeaders}
-							/>
-						</div>
+						<ResultPanel
+							activeTab={activeTab}
+							setActiveTab={setActiveTab}
+							result={result}
+							error={error}
+							requestLogs={requestLogs}
+							expandedLogs={expandedLogs}
+							toggleLog={toggleLog}
+							replayQuery={handleReplayQuery}
+							isLoading={isLoading}
+							introspectionData={introspectionData}
+							onReloadIntrospection={fetchIntrospection}
+							isIntrospectionLoading={isIntrospectionLoading}
+							isIntrospectionReFetching={
+								isIntrospectionReFetching
+							}
+							introspectionError={introspectionError}
+							headers={headers}
+							onHeadersChange={setHeaders}
+						/>
 					</Panel>
 				</PanelGroup>
 			</div>

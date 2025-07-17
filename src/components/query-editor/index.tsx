@@ -84,29 +84,28 @@ export function QueryEditor({
 
 	return (
 		<Card className="w-full flex flex-col border h-full md:rounded-l-xl md:rounded-r-none rounded-t-xl rounded-b-none">
-			<CardHeader className="flex-none border-b bg-muted/30 py-2">
-				<div className="flex items-center justify-between">
-					<CardTitle className="text-base font-medium">
-						Query
-					</CardTitle>
-					<div className="flex gap-2">
-						<Button
-							onClick={runQuery}
-							disabled={isLoading}
-							className="flex-1"
-							size="sm"
-						>
-							<PlayIcon className="mr-2 h-4 w-4" />
-							{isLoading ? 'Running...' : 'Run Query'}
-						</Button>
-						<EditorSettings
-							onZoomIn={handleZoomIn}
-							onZoomOut={handleZoomOut}
-							onResetZoom={handleResetZoom}
-						/>
-					</div>
+			<CardHeader className="flex-row items-center justify-between border-b bg-muted/30 py-2 h-[52px]">
+				<CardTitle className="text-base font-medium">Query</CardTitle>
+
+				<div className="flex gap-2">
+					<Button
+						className="w-28 gap-2"
+						onClick={runQuery}
+						disabled={isLoading}
+						size="sm"
+					>
+						<PlayIcon className="h-4 w-4" />
+						{isLoading ? 'Running...' : 'Run Query'}
+					</Button>
+
+					<EditorSettings
+						onZoomIn={handleZoomIn}
+						onZoomOut={handleZoomOut}
+						onResetZoom={handleResetZoom}
+					/>
 				</div>
 			</CardHeader>
+
 			<CardContent className="flex-1 p-0 min-h-0">
 				<PanelGroup direction="vertical" className="h-full">
 					<Panel
@@ -114,17 +113,17 @@ export function QueryEditor({
 						minSize={30}
 						className="min-h-[200px]"
 					>
-						<div className="h-full">
-							<MonacoEditor
-								key={JSON.stringify(introspectionData)}
-								value={query}
-								onChange={(value) => setQuery(value || '')}
-								onMount={handleEditorMount}
-								fontSize={settings.editor.fontSize}
-							/>
-						</div>
+						<MonacoEditor
+							key={JSON.stringify(introspectionData)}
+							value={query}
+							onChange={(value) => setQuery(value || '')}
+							onMount={handleEditorMount}
+							fontSize={settings.editor.fontSize}
+						/>
 					</Panel>
+
 					<PanelResizeHandle className="h-[3px] bg-border hover:bg-primary/50 transition-colors hidden md:block" />
+
 					<Panel
 						defaultSize={40}
 						minSize={20}

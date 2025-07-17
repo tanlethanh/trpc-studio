@@ -9,7 +9,7 @@ type Props = {
 
 export function Tabs({ activeTab, setActiveTab }: Props) {
 	return (
-		<div className="flex items-center gap-2 my-1">
+		<div className="flex items-center gap-2">
 			<button
 				onClick={() => setActiveTab('result')}
 				className={`px-3 py-1 text-sm rounded-md ${

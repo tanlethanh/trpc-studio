@@ -74,23 +74,22 @@ export function ResultPanel({
 
 	return (
 		<Card className="w-full flex flex-col border h-full md:rounded-r-xl md:rounded-l-none rounded-b-xl rounded-t-none">
-			<CardHeader className="flex-none border-b bg-muted/30 py-2">
-				<div className="flex items-center justify-between">
-					<Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-					{activeTab === 'introspection' && (
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={onReloadIntrospection}
-							disabled={isIntrospectionLoading}
-							className="h-8 w-8"
-						>
-							<RefreshCw
-								className={`h-4 w-4 ${isIntrospectionLoading ? 'animate-spin' : ''}`}
-							/>
-						</Button>
-					)}
-				</div>
+			<CardHeader className="flex-row items-center border-b bg-muted/30 py-2 h-[52px]">
+				<Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+				{activeTab === 'introspection' && (
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={onReloadIntrospection}
+						disabled={isIntrospectionLoading}
+						className="h-8 w-8"
+					>
+						<RefreshCw
+							className={`h-4 w-4 ${isIntrospectionLoading ? 'animate-spin' : ''}`}
+						/>
+					</Button>
+				)}
 			</CardHeader>
 
 			<CardContent className="flex-1 p-0 min-h-0 overflow-auto">
