@@ -4,7 +4,6 @@ import { parseJsonSchema } from './schema-parser';
 import { InputFields } from './input-fields';
 import { ProcedureSelector } from './procedure-selector';
 import type { IntrospectionData } from '@/types/trpc';
-import { Button } from '@/components/ui/button';
 
 interface ProcedureInputPanelProps {
 	introspectionData: IntrospectionData | null;
@@ -319,30 +318,21 @@ export function ProcedureInputPanel({
 	);
 
 	return (
-		<div className="flex flex-col h-full">
-			<div className="flex flex-col sm:flex-row gap-2 border-b p-2">
-				<Button
-					variant="ghost"
-					className="flex items-center justify-between p-2 hover:bg-muted/50 h-10 w-full sm:w-auto"
-				>
-					<span className="text-sm font-medium">Procedure Input</span>
-				</Button>
+		<div className="flex flex-col h-full min-h-0">
+			<div className="flex flex-col sm:flex-row gap-2 border-b px-4 items-center">
+				<span className="text-sm font-medium">Procedure Input</span>
 				<ProcedureSelector
 					introspectionData={introspectionData}
 					currentProcedure={currentProcedure}
 					onProcedureChange={handleProcedureChange}
 				/>
 			</div>
-			<div className="flex-1 min-h-0 overflow-hidden">
-				<div className="h-full flex flex-col">
-					<div className="flex-1 overflow-auto">
-						<InputFields
-							fields={fields}
-							inputValues={inputValues}
-							onInputChange={handleInputChange}
-						/>
-					</div>
-				</div>
+			<div className="flex-1 min-h-0 flex flex-col gap-1 px-4 pt-2 pb-10 overflow-y-auto">
+				<InputFields
+					fields={fields}
+					inputValues={inputValues}
+					onInputChange={handleInputChange}
+				/>
 			</div>
 		</div>
 	);

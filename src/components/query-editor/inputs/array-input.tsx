@@ -60,10 +60,7 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 	return (
 		<div className="space-y-2">
 			<div className="flex items-center gap-2">
-				<Label
-					htmlFor={field.name}
-					className="text-sm font-medium whitespace-nowrap"
-				>
+				<Label htmlFor={field.name} className="text-xs w-1/4">
 					{field.name} ({field.type})
 					{!field.required && (
 						<span className="text-muted-foreground ml-1">
@@ -110,7 +107,7 @@ export function ArrayInput({ field, value, onChange }: ArrayInputProps) {
 											)
 										}
 										placeholder="Enter value"
-										className="font-mono text-sm h-8"
+										className="font-mono text-xs h-8"
 									/>
 								)}
 							</div>

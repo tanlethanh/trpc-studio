@@ -24,7 +24,7 @@ export function ProcedureSelector({
 				value={currentProcedure || ''}
 				onValueChange={onProcedureChange}
 			>
-				<SelectTrigger className="w-full h-9">
+				<SelectTrigger className="h-8 w-52">
 					<SelectValue placeholder="Select a procedure" />
 				</SelectTrigger>
 				<SelectContent>

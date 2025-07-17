@@ -14,7 +14,7 @@ export function NumberInput({ field, value, onChange }: NumberInputProps) {
 
 	return (
 		<div className="flex flex-row gap-2 items-center">
-			<Label htmlFor={field.name} className="text-sm font-medium w-1/4">
+			<Label htmlFor={field.name} className="text-xs w-1/4">
 				{field.name} ({field.type})
 				{!field.required && (
 					<span className="text-muted-foreground ml-1">
@@ -33,7 +33,7 @@ export function NumberInput({ field, value, onChange }: NumberInputProps) {
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={`Enter ${field.name}`}
-				className="font-mono text-sm"
+				className="font-mono text-xs"
 				min={min}
 				max={max}
 			/>

@@ -15,7 +15,7 @@ export function InputFields({
 	if (fields.length === 0) return null;
 
 	return (
-		<div className="space-y-1 p-4">
+		<>
 			{fields.map((field) => (
 				<SchemaInput
 					key={field.name}
@@ -24,6 +24,6 @@ export function InputFields({
 					onChange={(value) => onInputChange(field.name, value)}
 				/>
 			))}
-		</div>
+		</>
 	);
 }
