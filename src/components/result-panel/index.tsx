@@ -148,5 +148,5 @@ const tabItems: TabItem<ResultTabKey>[] = [
 	{ key: 'result', title: 'Result', icon: CheckCircle2 },
 	{ key: 'history', title: 'History', icon: Clock },
 	{ key: 'introspection', title: 'Introspection', icon: Code },
-	{ key: 'headers', title: 'Introspection', icon: FileText },
+	{ key: 'headers', title: 'Headers', icon: FileText },
 ];
