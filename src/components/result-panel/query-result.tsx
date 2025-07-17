@@ -1,10 +1,11 @@
 import { Editor } from '@monaco-editor/react';
-import { CheckCircle2, Clock, Code, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock, Code, LoaderCircle, XCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRef, useEffect } from 'react';
 import * as monaco from 'monaco-editor';
 import { formatFullTimestamp } from '../../../utils';
 import type { RequestLog } from '@/types/trpc';
+import { cn } from '@/lib/utils';
 
 type Props = {
 	lastLog: RequestLog;
@@ -23,6 +24,8 @@ export function QueryResult({ lastLog, error, result }: Props) {
 		}
 	}, [lastLog]);
 
+	const isPending = !error && !result;
+
 	return (
 		<div className="h-full flex flex-col overflow-hidden">
 			{lastLog && (
@@ -31,28 +34,39 @@ export function QueryResult({ lastLog, error, result }: Props) {
 						<div className="flex items-center gap-1">
 							{error ? (
 								<XCircle className="h-4 w-4 text-destructive" />
-							) : (
+							) : result ? (
 								<CheckCircle2 className="h-4 w-4 text-green-500" />
+							) : (
+								<LoaderCircle className="h-4 w-4 text-blue-500 animate-spin" />
 							)}
 							<span className="font-medium">
-								{error ? 'Error' : 'Success'}
+								{error
+									? 'Error'
+									: result
+										? 'Success'
+										: 'Pending'}
 							</span>
 						</div>
-						<div className="flex items-center gap-1 text-muted-foreground">
-							<Clock className="h-4 w-4" />
-							<span>{lastLog.duration}ms</span>
-						</div>
-						<div className="flex items-center gap-1 text-muted-foreground">
-							<Code className="h-4 w-4" />
-							<span>{lastLog.procedure}</span>
-						</div>
-						<div className="text-muted-foreground">
-							{formatFullTimestamp(lastLog.timestamp)}
-						</div>
+
+						{!isPending && (
+							<>
+								<div className="flex items-center gap-1 text-muted-foreground">
+									<Clock className="h-4 w-4" />
+									<span>{lastLog.duration}ms</span>
+								</div>
+								<div className="flex items-center gap-1 text-muted-foreground">
+									<Code className="h-4 w-4" />
+									<span>{lastLog.procedure}</span>
+								</div>
+								<div className="text-muted-foreground">
+									{formatFullTimestamp(lastLog.timestamp)}
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 			)}
-			<div className="flex-1 min-h-0">
+			<div className={cn('flex-1 min-h-0', isPending && 'opacity-50')}>
 				<Editor
 					height="100%"
 					defaultLanguage="json"
