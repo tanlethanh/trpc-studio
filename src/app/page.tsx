@@ -75,27 +75,13 @@ export default function Home() {
 	}, [debouncedUrl, fetchIntrospection]);
 
 	useEffect(() => {
-		if (introspectionData?.procedures.length) {
-			let parsed: { procedure?: string } | null;
-
-			try {
-				parsed = JSON.parse(query);
-			} catch {
-				parsed = null;
-			}
-
-			const validProcedure = introspectionData.procedures.find(
-				(p) => p.path === parsed?.procedure,
-			);
-
-			if (!validProcedure) {
-				const firstProcedure = introspectionData.procedures[0];
-				const exampleQuery = {
-					procedure: firstProcedure.path,
-					input: getDefaultInputForSchema(firstProcedure.inputSchema),
-				};
-				setQuery(JSON.stringify(exampleQuery, null, 2));
-			}
+		if (introspectionData?.procedures.length && !query) {
+			const firstProcedure = introspectionData.procedures[0];
+			const exampleQuery = {
+				procedure: firstProcedure.path,
+				input: getDefaultInputForSchema(firstProcedure.inputSchema),
+			};
+			setQuery(JSON.stringify(exampleQuery, null, 2));
 		}
 	}, [introspectionData, query]);
 
