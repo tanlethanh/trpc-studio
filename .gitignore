@@ -43,4 +43,6 @@ next-env.d.ts
 .turbo
 dist
 
+.vscode
+.cursor
 .idea
