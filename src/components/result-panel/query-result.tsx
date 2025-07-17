@@ -3,6 +3,7 @@ import { CheckCircle2, Clock, Code, XCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRef, useEffect } from 'react';
 import * as monaco from 'monaco-editor';
+import { formatFullTimestamp } from '../../../utils';
 import type { RequestLog } from '@/types/trpc';
 
 type Props = {
@@ -25,7 +26,7 @@ export function QueryResult({ lastLog, error, result }: Props) {
 	return (
 		<div className="h-full flex flex-col overflow-hidden">
 			{lastLog && (
-				<div className="flex-none border-b bg-muted/30 p-2">
+				<div className="flex-none border-b bg-muted/30 px-5 py-2">
 					<div className="flex items-center gap-4 text-sm">
 						<div className="flex items-center gap-1">
 							{error ? (
@@ -46,7 +47,7 @@ export function QueryResult({ lastLog, error, result }: Props) {
 							<span>{lastLog.procedure}</span>
 						</div>
 						<div className="text-muted-foreground">
-							{new Date(lastLog.timestamp).toLocaleTimeString()}
+							{formatFullTimestamp(lastLog.timestamp)}
 						</div>
 					</div>
 				</div>

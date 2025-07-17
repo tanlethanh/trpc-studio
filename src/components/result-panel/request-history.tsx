@@ -7,6 +7,7 @@ import {
 	CheckCircle2,
 	XCircle,
 } from 'lucide-react';
+import { formatFullTimestamp } from '../../../utils';
 import { Button } from '@/components/ui/button';
 import type { RequestLog } from '@/types/trpc';
 
@@ -25,15 +26,10 @@ function JsonViewer({ data }: { data: unknown }) {
 		// Handle null or undefined
 		if (data == null) {
 			jsonString = String(data);
-			return (
-				<pre className="text-xs font-mono whitespace-pre-wrap break-all bg-muted/50 p-2 rounded-md overflow-auto max-h-[150px]">
-					{jsonString}
-				</pre>
-			);
 		}
 
 		// Handle string that might be JSON
-		if (typeof data === 'string') {
+		else if (typeof data === 'string') {
 			try {
 				const trimmed = data.trim();
 				if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
@@ -61,7 +57,7 @@ function JsonViewer({ data }: { data: unknown }) {
 	}
 
 	return (
-		<pre className="text-xs font-mono whitespace-pre-wrap break-all bg-muted/50 p-2 rounded-md overflow-auto max-h-[150px]">
+		<pre className="text-xs font-mono whitespace-pre-wrap break-all bg-muted/50 p-2 rounded-md overflow-auto max-h-[150px] min-h-8">
 			{jsonString}
 		</pre>
 	);
@@ -126,9 +122,7 @@ export function RequestHistory({
 								<Code className="h-3 w-3" />
 								<span>{log.procedure}</span>
 							</div>
-							<span>
-								{new Date(log.timestamp).toLocaleTimeString()}
-							</span>
+							<span>{formatFullTimestamp(log.timestamp)}</span>
 						</div>
 						{log.error && (
 							<div className="mt-1 text-xs text-red-500">
@@ -152,9 +146,9 @@ export function RequestHistory({
 										<span>{log.procedure}</span>
 									</div>
 									<div className="text-xs text-muted-foreground">
-										{new Date(
-											log.timestamp,
-										).toLocaleTimeString()}
+										<span>
+											{formatFullTimestamp(log.timestamp)}
+										</span>
 									</div>
 								</div>
 								<div className="text-xs font-medium text-muted-foreground mb-1">
