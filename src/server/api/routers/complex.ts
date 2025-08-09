@@ -11,7 +11,7 @@ const ProductSchema = z.object({
 	price: z.number().positive(),
 	stock: z.number().int().min(0).default(0),
 	categories: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).optional().default({
+	metadata: z.record(z.string(), z.unknown()).optional().default({
 		brand: '',
 		warranty: '',
 	}),
@@ -370,7 +370,7 @@ export const complexRouter = createTRPCRouter({
 			z.object({
 				totalOrders: z.number(),
 				totalSpent: z.number(),
-				statusBreakdown: z.record(z.number()),
+				statusBreakdown: z.record(z.string(), z.number()),
 				popularProducts: z.array(
 					z.object({
 						product: z.object({
@@ -379,7 +379,9 @@ export const complexRouter = createTRPCRouter({
 							price: z.number(),
 							stock: z.number(),
 							categories: z.array(z.string()),
-							metadata: z.record(z.unknown()).optional(),
+							metadata: z
+								.record(z.string(), z.unknown())
+								.optional(),
 						}),
 						quantity: z.number(),
 					}),

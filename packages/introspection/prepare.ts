@@ -16,6 +16,8 @@ const packageJsonContent = JSON.parse(packageJson);
 packageJsonContent.main = './index.js';
 packageJsonContent.module = './index.mjs';
 packageJsonContent.types = './index.d.ts';
+packageJsonContent.scripts = {};
+
 await writeFile(
 	join(__dirname, 'dist', 'package.json'),
 	JSON.stringify(packageJsonContent, null, 2),

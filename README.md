@@ -6,25 +6,55 @@ https://github.com/user-attachments/assets/ba3ef3e7-0641-47cc-9f45-0aca86d80883
 
 ## Quick Start
 
-1. Add introspection to your tRPC API:
+Note: This package supports `tRPC@11` and `zod@4`. Consider contributing if you need other schema engines or new features.
+
+### 1. Add introspection to your tRPC API:
 ```bash
 npm install @trpc-studio/introspection
 # or
 yarn add @trpc-studio/introspection
 ```
 
+#### Basic usage
 ```ts
-import { createTRPCRouter } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
 
+const t = initTRPC.create();
+const router = t.router
+
 export const appRouter = addIntrospectionEndpoint(
-  createTRPCRouter({})
+  router({
+    // Your router/procedures
+  })
 );
+
+// You also need to enable cors for the origin https://trpc-studio.vercel.app
 ```
 
-2. Visit [tRPC Studio](https://trpc-studio.vercel.app)
-3. Enter your API URL (e.g., `https://your-api.com/api/trpc`)
-4. Start testing your procedures!
+#### Development only
+```ts
+import { initTRPC } from '@trpc/server';
+import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
+
+const t = initTRPC.create();
+const router = t.router;
+
+const mainRouter = router({
+	// Your router/procedures
+});
+
+export const appRouter =
+	process.env.NODE_ENV === 'development'
+		? addIntrospectionEndpoint(mainRouter)
+		: mainRouter;
+
+// You also need to enable cors for the origin https://trpc-studio.vercel.app
+```
+
+### 2. Visit [tRPC Studio](https://trpc-studio.vercel.app)
+### 3. Enter your API URL (e.g., `https://your-api.com/api/trpc`)
+### 4. Start testing your procedures!
 
 ## Development
 

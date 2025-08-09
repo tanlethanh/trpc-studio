@@ -16,7 +16,7 @@ const UserSchema = z.object({
 		})
 		.optional(),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).optional().default({}),
+	metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 
 const PaginationSchema = z.object({
@@ -35,19 +35,16 @@ const SearchSchema = z.object({
 					min: z.number().optional().default(0),
 					max: z.number().optional().default(120),
 				})
-				.optional()
-				.default({}),
+				.optional(),
 			tags: z.array(z.string()).optional().default([]),
 			hasAddress: z.boolean().optional().default(false),
 		})
-		.optional()
-		.default({}),
-	pagination: PaginationSchema.optional().default({}),
+		.optional(),
+	pagination: PaginationSchema.optional(),
 });
 
 type User = z.infer<typeof UserSchema>;
 
-// Example data
 const users: User[] = [
 	{
 		id: '1',
@@ -82,7 +79,6 @@ const users: User[] = [
 ];
 
 export const exampleRouter = createTRPCRouter({
-	// Basic query with simple input/output
 	hello: publicProcedure
 		.input(z.string())
 		.output(z.string())

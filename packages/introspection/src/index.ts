@@ -1,6 +1,6 @@
-import { initTRPC, AnyTRPCRouter, AnyTRPCProcedure } from '@trpc/server';
-import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { initTRPC, AnyTRPCRouter } from '@trpc/server';
+import * as z from 'zod';
 
 export interface IntrospectionOptions {
 	enabled?: boolean;
@@ -18,38 +18,27 @@ export interface RouterInfo {
 	procedures: ProcedureInfo[];
 }
 
-// Helper to recursively collect procedures from a router
 function collectProcedures(
 	router: AnyTRPCRouter,
 	parentPath: string[] = [],
 ): ProcedureInfo[] {
 	const procedures: ProcedureInfo[] = [];
+	const proceduresEntries = Object.entries(router._def.procedures ?? {});
 
-	// Collect procedures
-	const proceduresEntries = Object.entries(router._def.procedures ?? {}) as [
-		string,
-		AnyTRPCProcedure,
-	][];
 	for (const [key, proc] of proceduresEntries) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const unsafeProc = proc as any;
-		const inputSchema =
-			typeof unsafeProc._def.inputs !== 'undefined'
-				? unsafeProc._def.inputs[0]
-				: null;
-		const outputSchema =
-			typeof unsafeProc._def.output !== 'undefined'
-				? unsafeProc._def.output
-				: null;
-		procedures.push({
-			path: [...parentPath, key].join('.'),
-			type: proc._def.type,
-			inputSchema: inputSchema ? zodToJsonSchema(inputSchema) : null,
-			outputSchema: outputSchema ? zodToJsonSchema(outputSchema) : null,
-		});
+		try {
+			const schema = extractProcedureSchema(proc);
+			procedures.push({
+				path: [...parentPath, key].join('.'),
+				type: (proc as any)._def.type,
+				inputSchema: schema.input ? z.toJSONSchema(schema.input) : null,
+				outputSchema: schema.output
+					? z.toJSONSchema(schema.output)
+					: null,
+			});
+		} catch {}
 	}
 
-	// Recurse into subrouters
 	for (const [key, sub] of Object.entries(router._def.record ?? {})) {
 		if (isTRPCRouter(sub)) {
 			procedures.push(...collectProcedures(sub, [...parentPath, key]));
@@ -69,18 +58,21 @@ export function addIntrospectionEndpoint<TRouter extends AnyTRPCRouter>(
 	const procedures = collectProcedures(router);
 
 	const introspectionRouter = t.router({
-		[path]: t.procedure.input(z.void()).query(() => {
-			return { procedures } as RouterInfo;
-		}),
+		[path]: t.procedure.input(z.void()).query(() => ({ procedures })),
 	});
 
-	// Merge the introspection router into the main router
-	return t.router({
-		...router,
-		...introspectionRouter,
-	});
+	return t.router({ ...router, ...introspectionRouter });
 }
 
 function isTRPCRouter(val: unknown): val is AnyTRPCRouter {
 	return typeof val === 'object' && val !== null && '_def' in val;
+}
+
+function extractProcedureSchema(proc: any) {
+	const input =
+		typeof proc._def.inputs !== 'undefined' ? proc._def.inputs[0] : null;
+	const output =
+		typeof proc._def.output !== 'undefined' ? proc._def.output : null;
+
+	return { input, output };
 }
