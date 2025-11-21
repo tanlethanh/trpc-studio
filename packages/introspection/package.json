@@ -32,7 +32,7 @@
     "zod": "^4"
   },
   "devDependencies": {
-    "@trpc/server": "^11.4.4",
+    "@trpc/server": "^11.7.1",
     "@types/node": "^20",
     "tsup": "^8.0.2",
     "typescript": "^5",
