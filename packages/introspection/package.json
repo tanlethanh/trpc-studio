@@ -22,8 +22,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --tsconfig tsconfig.json",
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts --tsconfig tsconfig.json",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "prepare": "rm -rf dist && yarn build && bun run prepare.ts",
-    "release": "yarn prepare && cd dist && yarn && npm publish --access public && cd .."
+    "release": "rm -rf dist && pnpm build && bun run prepare.ts && cd dist && pnpm install && npm publish --access public && cd .."
   },
   "publishConfig": {
     "access": "public"

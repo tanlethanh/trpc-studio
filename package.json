@@ -2,10 +2,6 @@
   "name": "trpc-studio",
   "version": "0.2.0",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "."
-  ],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -63,6 +59,5 @@
     "turbo": "^1.12.4",
     "typescript": "^5",
     "typescript-eslint": "^8.27.0"
-  },
-  "packageManager": "yarn@4.1.1"
+  }
 }
