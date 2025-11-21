@@ -31,9 +31,9 @@ function collectProcedures(
 			procedures.push({
 				path: [...parentPath, key].join('.'),
 				type: (proc as any)._def.type,
-				inputSchema: schema.input ? z.toJSONSchema(schema.input) : null,
+				inputSchema: schema.input ? toJSONSchema(schema.input) : null,
 				outputSchema: schema.output
-					? z.toJSONSchema(schema.output)
+					? toJSONSchema(schema.output)
 					: null,
 			});
 		} catch {}
@@ -75,4 +75,21 @@ function extractProcedureSchema(proc: any) {
 		typeof proc._def.output !== 'undefined' ? proc._def.output : null;
 
 	return { input, output };
+}
+
+function toJSONSchema(schema: z.ZodType) {
+	return z.toJSONSchema(schema, {
+		unrepresentable: 'any',
+		override: (ctx) => {
+			const def = ctx.zodSchema._zod.def;
+			if (def.type === 'date') {
+				ctx.jsonSchema.type = 'string';
+				ctx.jsonSchema.format = 'date-time';
+				ctx.jsonSchema.deprecated = true;
+				ctx.jsonSchema.title = 'Unsupported Date';
+				ctx.jsonSchema.description =
+					'Date is not supported. You should use coerce.date() to convert to string';
+			}
+		},
+	});
 }

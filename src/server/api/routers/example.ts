@@ -17,6 +17,7 @@ const UserSchema = z.object({
 		.optional(),
 	tags: z.array(z.string()).default([]),
 	metadata: z.record(z.string(), z.unknown()).optional().default({}),
+	createdAt: z.coerce.date().default(new Date()),
 });
 
 const PaginationSchema = z.object({
@@ -38,6 +39,8 @@ const SearchSchema = z.object({
 				.optional(),
 			tags: z.array(z.string()).optional().default([]),
 			hasAddress: z.boolean().optional().default(false),
+			fromCreatedAt: z.coerce.date().optional(),
+			toCreatedAt: z.coerce.date().optional(),
 		})
 		.optional(),
 	pagination: PaginationSchema.optional(),
@@ -65,6 +68,7 @@ const users: User[] = [
 				notifications: true,
 			},
 		},
+		createdAt: new Date('2025-09-10T15:30:00Z'),
 	},
 	{
 		id: '2',
@@ -75,6 +79,7 @@ const users: User[] = [
 		metadata: {
 			lastLogin: '2024-03-14T15:30:00Z',
 		},
+		createdAt: new Date('2025-09-18T15:30:00Z'),
 	},
 ];
 
@@ -140,6 +145,16 @@ export const exampleRouter = createTRPCRouter({
 						if (filters.hasAddress && !user.address) return false;
 						if (!filters.hasAddress && user.address) return false;
 					}
+					if (
+						filters.fromCreatedAt &&
+						user.createdAt < filters.fromCreatedAt
+					)
+						return false;
+					if (
+						filters.toCreatedAt &&
+						user.createdAt > filters.toCreatedAt
+					)
+						return false;
 				}
 
 				return true;
