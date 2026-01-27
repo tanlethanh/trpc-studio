@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+import { createTRPCProxyClient, httpBatchLink, TRPCLink } from '@trpc/client';
+import * as devalue from 'devalue';
+import superjson from 'superjson';
 import type { RequestLog, IntrospectionData } from '@/types/trpc';
 
 interface Header {
@@ -44,6 +46,11 @@ export function useQueryExecution(
 		setResult(null);
 		const startTime = performance.now();
 
+		if (!introspectionData) {
+			setError('No introspection data available');
+			return;
+		}
+
 		try {
 			// Convert headers array to object for tRPC client
 			const headerObject = headers.reduce(
@@ -54,17 +61,41 @@ export function useQueryExecution(
 				{} as Record<string, string>,
 			);
 
-			const client = createTRPCProxyClient({
-				links: [
-					httpBatchLink({
+			// Use the transformer detected from introspection response
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			let link: TRPCLink<any>;
+			switch (introspectionData.transformer) {
+				case 'superjson':
+					link = httpBatchLink({
 						url: trpcUrl,
 						headers: headerObject,
-					}),
-				],
+						transformer: superjson,
+					});
+					break;
+				case 'devalue':
+					link = httpBatchLink({
+						url: trpcUrl,
+						headers: headerObject,
+						transformer: {
+							serialize: devalue.stringify,
+							deserialize: devalue.parse,
+						},
+					});
+					break;
+				default:
+					link = httpBatchLink({
+						url: trpcUrl,
+						headers: headerObject,
+					});
+					break;
+			}
+
+			const client = createTRPCProxyClient({
+				links: [link],
 			});
 
 			// Get the procedure type from introspection data
-			const procedureInfo = introspectionData?.procedures.find(
+			const procedureInfo = introspectionData.procedures.find(
 				(p) => p.path === procedure,
 			);
 			const isMutation = procedureInfo?.type === 'mutation';

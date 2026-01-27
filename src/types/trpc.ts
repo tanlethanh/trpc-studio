@@ -1,4 +1,6 @@
 export interface IntrospectionData {
+	// Automatically detected transformer type
+	transformer: 'superjson' | 'devalue' | 'json';
 	procedures: Array<{
 		path: string;
 		type: 'query' | 'mutation' | 'subscription';

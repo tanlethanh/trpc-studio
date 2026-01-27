@@ -72,6 +72,42 @@ export const appRouter = withIntrospection(t, mainRouter, {
 // You also need to enable cors for the origin https://trpc-studio.vercel.app
 ```
 
+### With data transformers (SuperJSON, etc.)
+
+The introspection endpoint automatically preserves your data transformer configuration:
+
+```ts
+import { initTRPC } from '@trpc/server';
+import { withIntrospection } from '@trpc-studio/introspection';
+import superjson from 'superjson';
+
+// Create tRPC instance with SuperJSON transformer
+const t = initTRPC.create({
+	transformer: superjson,
+});
+
+const router = t.router({
+	// Your procedures can now use Date, Map, Set, etc.
+	getUser: t.procedure.query(() => ({
+		name: 'John',
+		createdAt: new Date(), // Will be properly serialized
+	})),
+});
+
+// Transformer is preserved in the introspection endpoint
+export const appRouter = withIntrospection(t, router);
+```
+
+Both your regular procedures and the introspection endpoint will use the same transformer. No additional configuration needed!
+
+Studio detects SuperJSON vs devalue from your tRPC config so the client encodes procedure calls correctly. To force a hint (e.g. for custom transformers), pass `transformer: 'superjson' | 'devalue'` in options:
+
+```ts
+export const appRouter = withIntrospection(t, router, {
+  transformer: 'superjson', // or 'devalue'; optional if auto-detected
+});
+```
+
 ## Usage with tRPC Studio
 
 ### 1. Add the introspection endpoint to your tRPC router
@@ -83,7 +119,7 @@ export const appRouter = withIntrospection(t, mainRouter, {
 
 ### `withIntrospection(t, router, options?)` (Recommended)
 
-Adds an introspection endpoint by passing the tRPC root object directly. This is the recommended approach as it provides explicit control over your tRPC instance.
+Adds an introspection endpoint by passing the tRPC root object directly. This is the recommended approach as it provides explicit control over your tRPC instance and automatically preserves any transformer configuration (SuperJSON, etc.).
 
 **Parameters:**
 - `t` - The tRPC root object (from `initTRPC.create()`)
@@ -97,6 +133,7 @@ const router = t.router({ /* ... */ });
 const routerWithIntrospection = withIntrospection(t, router, {
   enabled: process.env.NODE_ENV === 'development'
 });
+// The transformer is automatically preserved for all procedures
 ```
 
 ### `addIntrospectionEndpoint(router, options?)`
@@ -121,11 +158,12 @@ const routerWithIntrospection = addIntrospectionEndpoint(myRouter, {
 
 Both `addIntrospectionEndpoint` and `withIntrospection` accept the same options:
 
-| Option   | Type      | Default            | Description                                 |
-|----------|-----------|--------------------|---------------------------------------------|
-| enabled  | boolean   | true               | Enable/disable introspection endpoint       |
-| path     | string    | 'introspection'    | Customize introspection endpoint path       |
+| Option      | Type                      | Default         | Description                                                       |
+|-------------|---------------------------|-----------------|-------------------------------------------------------------------|
+| enabled     | boolean                   | true            | Enable/disable introspection endpoint                             |
+| path        | string                    | 'introspection' | Customize introspection endpoint path                             |
+| transformer | 'superjson' \| 'devalue'  | auto-detected   | Hint for Studio's client; overrides auto-detection when provided  |
 
 ## License
 
-MIT 
+MIT

@@ -1,13 +1,13 @@
-import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
-import { createTRPCRouter } from './trpc';
+import { withIntrospection } from '@trpc-studio/introspection';
+import { createTRPCRouter, t } from './trpc';
 import { exampleRouter } from './routers/example';
 import { complexRouter } from './routers/complex';
 
-export const appRouter = addIntrospectionEndpoint(
-	createTRPCRouter({
-		example: exampleRouter,
-		complex: complexRouter,
-	}),
-);
+const router = createTRPCRouter({
+	example: exampleRouter,
+	complex: complexRouter,
+});
+
+export const appRouter = withIntrospection(t, router);
 
 export type AppRouter = typeof appRouter;

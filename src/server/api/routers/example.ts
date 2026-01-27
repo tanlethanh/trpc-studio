@@ -295,4 +295,22 @@ export const exampleRouter = createTRPCRouter({
 
 			return stats;
 		}),
+
+	// Demonstrates SuperJSON transformer preserving Date objects
+	getServerInfo: publicProcedure
+		.output(
+			z.object({
+				currentTime: z.date(),
+				uptime: z.number(),
+				message: z.string(),
+			}),
+		)
+		.query(() => {
+			return {
+				currentTime: new Date(), // SuperJSON will preserve this as a Date object
+				uptime: process.uptime(),
+				message:
+					'This Date object is properly serialized thanks to SuperJSON!',
+			};
+		}),
 });
