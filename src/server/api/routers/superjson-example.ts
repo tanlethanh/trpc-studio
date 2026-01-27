@@ -36,7 +36,7 @@ export const superjsonExampleRouter = superjsonRouter({
 			infinity: Infinity,
 			negativeInfinity: -Infinity,
 			notANumber: NaN,
-			bigInt: 9007199254740991n,
+			bigInt: BigInt('9007199254740991'),
 			regularNumber: 42,
 		};
 	}),
