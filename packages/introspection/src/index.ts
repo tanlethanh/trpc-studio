@@ -71,7 +71,7 @@ export function addIntrospectionEndpoint<TRouter extends AnyTRPCRouter>(
  * Requires TRPCRootObject to use routerBuilder and mergeRouters methods.
  */
 export const withIntrospection = <TRouter extends AnyTRPCRouter>(
-	t: TRPCRootObject<object, object, any, any>,
+	t: TRPCRootObject<any, any, any, any>,
 	router: TRouter,
 	options: IntrospectionOptions = {},
 ): TRouter => {
