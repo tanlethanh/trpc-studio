@@ -700,6 +700,23 @@ describe('addIntrospectionEndpoint', () => {
 			expect(routerWithIntrospection).toBe(router);
 			expect('introspection' in routerWithIntrospection).toBe(false);
 		});
+
+		it('should work with custom context (req, cookies, etc.) when using withIntrospection', () => {
+			type Context = {
+				req: { url: string };
+				getCookie: (name: string) => string | null;
+				setCookie: (name: string, value: string) => void;
+			};
+			const t = initTRPC.context<Context>().create();
+			const router = t.router({
+				who: t.procedure.query(
+					({ ctx }) => ctx.getCookie('user') ?? 'anon',
+				),
+			});
+			const routerWithIntrospection = withIntrospection(t, router);
+			expect('introspection' in routerWithIntrospection).toBe(true);
+			expect('who' in routerWithIntrospection).toBe(true);
+		});
 	});
 
 	describe('internal functions coverage', () => {
