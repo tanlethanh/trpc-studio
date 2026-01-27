@@ -22,7 +22,10 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --tsconfig tsconfig.json",
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts --tsconfig tsconfig.json",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "release": "rm -rf dist && pnpm build && bun run prepare.ts && cd dist && pnpm install && npm publish --access public && cd .."
+    "release": "rm -rf dist && pnpm build && bun run prepare.ts && cd dist && pnpm install && npm publish --access public && cd ..",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage"
   },
   "publishConfig": {
     "access": "public"
@@ -37,5 +40,8 @@
     "tsup": "^8.0.2",
     "typescript": "^5",
     "zod": "^4.0.16"
+  },
+  "dependencies": {
+    "@types/bun": "^1.3.6"
   }
 }
