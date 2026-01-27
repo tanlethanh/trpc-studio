@@ -17,14 +17,35 @@ yarn add @trpc-studio/introspection
 
 ### Setup
 
-Add the introspection endpoint to your tRPC router:
+Add the introspection endpoint to your tRPC router using `withIntrospection` (recommended):
 
 ```typescript
-import { createTRPCRouter } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
+import { withIntrospection } from '@trpc-studio/introspection';
+
+const t = initTRPC.create();
+
+const router = t.router({
+  // Your procedures here
+});
+
+export const appRouter = withIntrospection(t, router, {
+  enabled: process.env.NODE_ENV === 'development'
+});
+```
+
+Alternatively, use the convenience method `addIntrospectionEndpoint`:
+
+```typescript
+import { initTRPC } from '@trpc/server';
 import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
 
+const t = initTRPC.create();
+
 export const appRouter = addIntrospectionEndpoint(
-  createTRPCRouter({})
+  t.router({
+    // Your procedures here
+  })
 );
 ```
 

@@ -18,16 +18,15 @@ yarn add @trpc-studio/introspection
 #### Basic usage
 ```ts
 import { initTRPC } from '@trpc/server';
-import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
+import { withIntrospection } from '@trpc-studio/introspection';
 
 const t = initTRPC.create();
-const router = t.router
 
-export const appRouter = addIntrospectionEndpoint(
-  router({
-    // Your router/procedures
-  })
-);
+const router = t.router({
+  // Your router/procedures
+});
+
+export const appRouter = withIntrospection(t, router);
 
 // You also need to enable cors for the origin https://trpc-studio.vercel.app
 ```
@@ -35,21 +34,36 @@ export const appRouter = addIntrospectionEndpoint(
 #### Development only
 ```ts
 import { initTRPC } from '@trpc/server';
-import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
+import { withIntrospection } from '@trpc-studio/introspection';
 
 const t = initTRPC.create();
-const router = t.router;
 
-const mainRouter = router({
+const router = t.router({
 	// Your router/procedures
 });
 
-export const appRouter =
-	process.env.NODE_ENV === 'development'
-		? addIntrospectionEndpoint(mainRouter)
-		: mainRouter;
+export const appRouter = withIntrospection(t, router, {
+	enabled: process.env.NODE_ENV === 'development',
+});
 
 // You also need to enable cors for the origin https://trpc-studio.vercel.app
+```
+
+#### Convenience method: `addIntrospectionEndpoint`
+
+For simpler use cases where you don't need explicit control:
+
+```ts
+import { initTRPC } from '@trpc/server';
+import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
+
+const t = initTRPC.create();
+
+export const appRouter = addIntrospectionEndpoint(
+  t.router({
+    // Your router/procedures
+  })
+);
 ```
 
 ### 2. Visit [tRPC Studio](https://trpc-studio.vercel.app)

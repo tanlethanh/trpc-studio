@@ -16,7 +16,26 @@ npm install @trpc-studio/introspection
 yarn add @trpc-studio/introspection
 ```
 
-### Basic usage
+### Basic usage (Recommended)
+
+```ts
+import { initTRPC } from '@trpc/server';
+import { withIntrospection } from '@trpc-studio/introspection';
+
+const t = initTRPC.create();
+
+const router = t.router({
+  // Your router/procedures
+});
+
+export const appRouter = withIntrospection(t, router);
+
+// You also need to enable cors for the origin https://trpc-studio.vercel.app
+```
+
+### Convenience method: `addIntrospectionEndpoint`
+
+For simpler use cases where you don't need explicit control over the tRPC instance:
 
 ```ts
 import { initTRPC } from '@trpc/server';
@@ -30,26 +49,25 @@ export const appRouter = addIntrospectionEndpoint(
     // Your router/procedures
   })
 );
-
-// You also need to enable cors for the origin https://trpc-studio.vercel.app
 ```
 
+> **Note:** `addIntrospectionEndpoint` is a convenience wrapper that extracts the router's configuration and internally creates a new tRPC instance. Use `withIntrospection` for more explicit control.
+
 ### Development only
+
 ```ts
 import { initTRPC } from '@trpc/server';
-import { addIntrospectionEndpoint } from '@trpc-studio/introspection';
+import { withIntrospection } from '@trpc-studio/introspection';
 
 const t = initTRPC.create();
-const router = t.router;
 
-const mainRouter = router({
+const mainRouter = t.router({
 	// Your router/procedures
 });
 
-export const appRouter =
-	process.env.NODE_ENV === 'development'
-		? addIntrospectionEndpoint(mainRouter)
-		: mainRouter;
+export const appRouter = withIntrospection(t, mainRouter, {
+	enabled: process.env.NODE_ENV === 'development',
+});
 
 // You also need to enable cors for the origin https://trpc-studio.vercel.app
 ```
@@ -61,12 +79,52 @@ export const appRouter =
 ### 3. Enter your API URL (e.g., `https://your-api.com/api/trpc`)
 ### 4. Start testing your procedures!
 
+## API
+
+### `withIntrospection(t, router, options?)` (Recommended)
+
+Adds an introspection endpoint by passing the tRPC root object directly. This is the recommended approach as it provides explicit control over your tRPC instance.
+
+**Parameters:**
+- `t` - The tRPC root object (from `initTRPC.create()`)
+- `router` - Your tRPC router
+- `options` - Optional configuration object
+
+**Example:**
+```ts
+const t = initTRPC.create({ transformer: superjson });
+const router = t.router({ /* ... */ });
+const routerWithIntrospection = withIntrospection(t, router, {
+  enabled: process.env.NODE_ENV === 'development'
+});
+```
+
+### `addIntrospectionEndpoint(router, options?)`
+
+A convenience wrapper that adds an introspection endpoint to an existing tRPC router. This method extracts the router's configuration and internally creates a new tRPC instance.
+
+**Parameters:**
+- `router` - Your tRPC router
+- `options` - Optional configuration object
+
+**Example:**
+```ts
+const routerWithIntrospection = addIntrospectionEndpoint(myRouter, {
+  enabled: process.env.NODE_ENV === 'development',
+  path: 'schema'
+});
+```
+
+> **Note:** While simpler, this method is less explicit about tRPC instance management. Consider using `withIntrospection` for better clarity and control.
+
 ## Options
+
+Both `addIntrospectionEndpoint` and `withIntrospection` accept the same options:
 
 | Option   | Type      | Default            | Description                                 |
 |----------|-----------|--------------------|---------------------------------------------|
 | enabled  | boolean   | true               | Enable/disable introspection endpoint       |
-| path     | string    | '/introspection'   | Customize introspection endpoint path       |
+| path     | string    | 'introspection'    | Customize introspection endpoint path       |
 
 ## License
 
