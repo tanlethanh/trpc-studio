@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { initTRPC, AnyTRPCRouter } from '@trpc/server';
+import { initTRPC, AnyTRPCRouter, TRPCRootObject } from '@trpc/server';
 import * as z from 'zod';
 
 export interface IntrospectionOptions {
@@ -47,22 +48,44 @@ function collectProcedures(
 	return procedures;
 }
 
+/**
+ * Add introspection endpoint to a tRPC router.
+ * Simple wrapper for withIntrospection that creates a new tRPC instance
+ * with the same config as the original router.
+ */
 export function addIntrospectionEndpoint<TRouter extends AnyTRPCRouter>(
 	router: TRouter,
 	options: IntrospectionOptions = {},
 ): TRouter {
+	const routerConfig = router._def._config;
+	const t = initTRPC.create(
+		// Omit $types as it's not part of RuntimeConfigOptions
+		(({ $types, ...config }) => config)(routerConfig),
+	);
+
+	return withIntrospection(t, router, options);
+}
+
+/**
+ * Add introspection endpoint to a tRPC router.
+ * Requires TRPCRootObject to use routerBuilder and mergeRouters methods.
+ */
+export const withIntrospection = <TRouter extends AnyTRPCRouter>(
+	t: TRPCRootObject<object, object, any, any>,
+	router: TRouter,
+	options: IntrospectionOptions = {},
+): TRouter => {
 	const { enabled = true, path = 'introspection' } = options;
 	if (!enabled) return router;
 
-	const t = initTRPC.create();
 	const procedures = collectProcedures(router);
 
 	const introspectionRouter = t.router({
 		[path]: t.procedure.input(z.void()).query(() => ({ procedures })),
 	});
 
-	return t.router({ ...router, ...introspectionRouter });
-}
+	return t.mergeRouters(router, introspectionRouter);
+};
 
 function isTRPCRouter(val: unknown): val is AnyTRPCRouter {
 	return typeof val === 'object' && val !== null && '_def' in val;
