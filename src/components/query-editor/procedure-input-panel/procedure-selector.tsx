@@ -28,11 +28,21 @@ export function ProcedureSelector({
 					<SelectValue placeholder="Select a procedure" />
 				</SelectTrigger>
 				<SelectContent>
-					{introspectionData?.procedures.map((procedure) => (
-						<SelectItem key={procedure.path} value={procedure.path}>
-							{procedure.path}
-						</SelectItem>
-					))}
+					{introspectionData?.procedures &&
+					introspectionData.procedures.length > 0 ? (
+						introspectionData.procedures.map((procedure) => (
+							<SelectItem
+								key={procedure.path}
+								value={procedure.path}
+							>
+								{procedure.path}
+							</SelectItem>
+						))
+					) : (
+						<div className="px-2 py-1.5 text-sm text-muted-foreground">
+							No procedures available
+						</div>
+					)}
 				</SelectContent>
 			</Select>
 		</div>
